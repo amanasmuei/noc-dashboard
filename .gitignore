@@ -1,3 +1,5 @@
 *.html
 !index.html
 .DS_Store
+dist/
+.wrangler/
