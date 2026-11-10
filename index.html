@@ -308,6 +308,11 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .r3>.card:last-child{display:flex;flex-direction:column}
 .r3>.card:last-child>.card-b{flex:1;display:flex;flex-direction:column;min-height:0}
 .r3 .trend{flex:1;height:auto;min-height:200px}
+/* sticky header + tabs; --hdh/--stackh are measured in script so offsets survive wrapping */
+.hd{position:sticky;top:0;z-index:30}
+.tabs{position:sticky;top:var(--hdh,64px);z-index:29}
+/* rail scrolls with the page: it is nearly as tall as the page, so pinning it under a fixed header only drifts */
+.rail{position:static}
 
 /* filter rail */
 .rail-top{padding:12px 16px}
@@ -992,6 +997,11 @@ $('#hup').addEventListener('click',()=>{document.querySelector('.tabs button[dat
 const _ra=renderAdmin;renderAdmin=function(){_ra();$('#hup').hidden=!ADM.can};
 
 buildData();F.m=HAS[0]?0:null;render();renderAdmin();
+
+/* sticky header offsets: header can wrap, so measure instead of hardcoding */
+const _hd=document.querySelector('.hd'),_tb=document.querySelector('.tabs');
+const syncSticky=()=>{const s=document.documentElement.style;s.setProperty('--hdh',_hd.offsetHeight+'px');s.setProperty('--stackh',(_hd.offsetHeight+_tb.offsetHeight)+'px')};
+syncSticky();addEventListener('resize',syncSticky);if(window.ResizeObserver)new ResizeObserver(syncSticky).observe(_hd);
 </script>
 
 </body></html>
