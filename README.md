@@ -72,3 +72,26 @@ make pi-reset PI=…   PI_DIR=…        # wipe the store, re-seed on next page 
 Run mode is `docker compose` on the Pi, `restart: unless-stopped`, so it comes back after reboot.
 The container runs as uid `10001`, so `./data` on the Pi is owned by that uid — use the targets
 above instead of editing files there by hand (or prefix with `sudo`).
+
+## Public access (Cloudflare Tunnel)
+
+Plain HTTP on the LAN needs nothing. To reach the dashboard from outside:
+
+```bash
+make tunnel PI=… PI_DIR=…      # quick tunnel, prints https://<random>.trycloudflare.com
+make tunnel-off PI=… PI_DIR=…  # kill it
+```
+
+The quick tunnel is throwaway: random hostname each start, no SLA, and **no auth** —
+anyone holding the link can read the dashboard and publish data. Do not leave it running
+on a machine holding real NOC data.
+
+Stable + protected = named tunnel: create a tunnel in Cloudflare Zero Trust, point it at
+`http://noc:8080`, then run with the token.
+
+```bash
+TUNNEL_TOKEN=eyJ... docker compose --profile tunnel up -d tunnel
+```
+
+Bind it to a hostname on a Cloudflare-managed domain and put a Zero Trust **Access** policy
+(email OTP / SSO) in front — the tunnel itself has no authentication of its own.

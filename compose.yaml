@@ -7,3 +7,19 @@ services:
     volumes:
       - ./data:/app/data
     restart: unless-stopped
+
+  # quick, throwaway public URL: docker compose --profile quick up -d quick
+  quick:
+    image: cloudflare/cloudflared:latest
+    profiles: ["quick"]
+    command: tunnel --no-autoupdate --url http://noc:8080
+    depends_on: [noc]
+    restart: unless-stopped
+
+  # named tunnel: needs a token from the Cloudflare dashboard (Zero Trust > Tunnels)
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: ["tunnel"]
+    command: tunnel --no-autoupdate run --token ${TUNNEL_TOKEN:-}
+    depends_on: [noc]
+    restart: unless-stopped

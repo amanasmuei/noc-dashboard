@@ -1,4 +1,4 @@
-.PHONY: help run up down logs build ps backup reset deploy dist check pi-check pi pi-logs pi-pull pi-reset
+.PHONY: help run up down logs build ps backup reset deploy dist check pi-check pi pi-logs pi-pull pi-reset tunnel tunnel-off
 
 PORT ?= 8080
 PY   ?= python3
@@ -61,6 +61,13 @@ pi:                       ## sync to the Pi, build, fix ./data ownership, restar
 
 pi-logs:                  ## follow the Pi container logs
 	ssh $(PI) 'cd $(PI_DIR) && docker compose logs -f --tail 50'
+
+tunnel:                   ## quick public URL via trycloudflare.com (random host, no auth, LAN data leaves the house)
+	ssh $(PI) 'cd $(PI_DIR) && docker compose --profile quick up -d quick \
+	  && sleep 7 && docker compose logs --no-log-prefix quick 2>&1 | grep -o "https://[a-z0-9.-]*trycloudflare[.]com" | tail -1'
+
+tunnel-off:               ## kill the quick tunnel
+	ssh $(PI) 'cd $(PI_DIR) && docker compose --profile quick rm -sf quick'
 
 pi-reset:                 ## DESTROY the Pi's store (asks first), then re-seed on next page load
 	@read -p "Delete the store on $(PI)? [y/N] " a; [ "$$a" = y ] || { echo aborted; exit 1; }
