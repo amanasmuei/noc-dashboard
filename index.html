@@ -471,31 +471,53 @@ select{border-radius:6px}
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
-/* Local mode: when opened outside Claude, emulate the claude.use() runtime with localStorage.
-   Data stays in this browser only. */
+/* Local mode: outside Claude, use serve.py's shared store (data/ntt.json).
+   Opened with no server behind it (file://), fall back to localStorage for this browser only. */
 if(typeof window.claude==='undefined'){(function(){
-  const K='tnoc-local:';
-  const load=c=>{try{return JSON.parse(localStorage.getItem(K+c))||{}}catch(e){return{}}};
-  const save=(c,o)=>{try{localStorage.setItem(K+c,JSON.stringify(o))}catch(e){throw new Error('too large')}};
-  const subs={};
-  const snap=c=>{const o=load(c);return{docs:Object.keys(o).map(id=>({id,data:()=>o[id]}))}};
+  const K='tnoc-local:', subs={}, st={remote:null};
+  let cache={};
+  const lsLoad=c=>{try{return JSON.parse(localStorage.getItem(K+c))||{}}catch(e){return{}}},
+        lsSave=(c,o)=>{try{localStorage.setItem(K+c,JSON.stringify(o))}catch(e){throw new Error('too large')}};
+  const map=c=>{if(!st.remote)return lsLoad(c);const o={};for(const p in cache)if(p.startsWith(c+'/'))o[p.slice(c.length+1)]=cache[p];return o};
+  const snap=c=>{const o=map(c);return{docs:Object.keys(o).map(id=>({id,data:()=>o[id]}))}};
   const notify=c=>(subs[c]||[]).forEach(f=>{try{f(snap(c))}catch(e){}});
+  async function remote(){
+    if(st.remote!==null)return st.remote;
+    try{const r=await fetch('/api/all',{cache:'no-store'});if(!r.ok)throw 0;
+      cache=await r.json();st.remote=true;
+      setInterval(async()=>{try{const q=await fetch('/api/all',{cache:'no-store'});const v=await q.json();
+        if(JSON.stringify(v)!==JSON.stringify(cache)){cache=v;notify('ntt');notify('uploads')}}catch(e){}},5000);
+    }catch(e){st.remote=false;window.__storeErr=String(e&&e.message||e)}
+    return st.remote;
+  }
+  async function put(path,data,del){
+    if(await remote()){                     /* shared store: optimistic cache, roll back if the write fails */
+      const had=path in cache, old=cache[path];
+      del?delete cache[path]:cache[path]=data;
+      try{
+        const r=await fetch('/api/doc',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({path,data,delete:!!del})});
+        if(!r.ok)throw new Error('store '+r.status);
+      }catch(e){had?cache[path]=old:delete cache[path];throw e}
+      return;
+    }
+    const[c,id]=path.split('/'),o=lsLoad(c);del?delete o[id]:o[id]=data;lsSave(c,o);
+  }
   window.addEventListener('storage',e=>{if(e.key&&e.key.startsWith(K))notify(e.key.slice(K.length))});
   const col=c=>({
-    onSnapshot(cb){(subs[c]=subs[c]||[]).push(cb);setTimeout(()=>cb(snap(c)));return()=>{subs[c]=subs[c].filter(f=>f!==cb)}},
-    async add(d){const o=load(c),id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);o[id]=d;save(c,o);notify(c);return{id}},
-    orderBy(f,dir){let lim=Infinity;const q={limit(n){lim=n;return q},async get(){const s=snap(c),m=dir==='desc'?-1:1;
+    onSnapshot(cb){(subs[c]=subs[c]||[]).push(cb);remote().then(()=>cb(snap(c)));return()=>{subs[c]=subs[c].filter(f=>f!==cb)}},
+    async add(d){await remote();const id=Date.now().toString(36)+Math.random().toString(36).slice(2,6);await put(c+'/'+id,d);notify(c);return{id}},
+    orderBy(f,dir){let lim=Infinity;const q={limit(n){lim=n;return q},async get(){await remote();const s=snap(c),m=dir==='desc'?-1:1;
       s.docs.sort((a,b)=>{const x=a.data()[f],y=b.data()[f];return(x<y?-1:x>y?1:0)*m});s.docs=s.docs.slice(0,lim);return s}};return q},
-    async get(){return snap(c)}
+    async get(){await remote();return snap(c)}
   });
   const doc=p=>{const[c,id]=p.split('/');return{
-    async set(d){const o=load(c);o[id]=d;save(c,o);notify(c)},
-    async delete(){const o=load(c);delete o[id];save(c,o);notify(c)},
-    async get(){const o=load(c);return{exists:id in o,data:()=>o[id]}}
+    async set(d){await put(p,d);notify(c)},
+    async delete(){await put(p,null,true);notify(c)},
+    async get(){await remote();const o=map(c);return{exists:id in o,data:()=>o[id]}}
   }};
   const db={collection:col,doc};
   const user={canEdit:async()=>true,can:async()=>true,id:async()=>'local',
-    profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:'You (this browser)'}]))};
+    profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:st.remote?'You':'You (this browser)'}]))};
   const downloads={async save({filename,data}){const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([data],{type:'text/csv'}));a.download=filename;document.body.appendChild(a);a.click();
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}};
@@ -643,11 +665,28 @@ document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',
 $('#theme').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=dark?'light':'dark'});
 /* ---------- data layer: original workbook + shared uploads ---------- */
 const HAS=Array(12).fill(false), LIVE={}, BASE_RAW=Array.from({length:12},()=>[]);
+let SEEDED=false;   /* store holds published months -> baked BASE must never fill the gaps */
 for(const r of BASE.rows)BASE_RAW[r[0]].push([BASE.pic[r[1]],BASE.state[r[2]],BASE.cause[r[3]],BASE.sub[r[4]],BASE.bld[r[5]],BASE.status[r[6]],r[8]]);
 const DK=['pic','state','cause','sub','bld','status'];
 const DEC=new WeakMap();
-const monthRows=m=>{const d=LIVE[m];if(!d)return BASE_RAW[m];let r=DEC.get(d);if(!r){r=decodeDoc(d);DEC.set(d,r)}return r};
+const monthRows=m=>{const d=LIVE[m];if(d){let r=DEC.get(d);if(!r){r=decodeDoc(d);DEC.set(d,r)}return r}return SEEDED?[]:BASE_RAW[m]};
 function decodeDoc(d){const q=d.dic;return d.rows.map(r=>[q.pic[r[0]],q.state[r[1]],q.cause[r[2]],q.sub[r[3]],q.bld[r[4]],q.status[r[5]],r[6]])}
+/* seed the baked baseline into the store once, so afterwards uploads are the only source */
+async function seedBaseline(){
+  try{
+    if((await ADM.db.doc('meta/seed').get()).exists)return;
+    const cur=await ADM.db.collection('ntt').get();
+    if(!cur.docs.some(d=>/^m(0[1-9]|1[0-2])$/.test(d.id)))
+      for(let m=0;m<12;m++)if(BASE_RAW[m].length)await ADM.db.doc('ntt/m'+String(m+1).padStart(2,'0')).set(baselineDoc(m,BASE_RAW[m]));
+    await ADM.db.doc('meta/seed').set({at:new Date().toISOString(),source:'baseline'});
+  }catch(e){}
+}
+function baselineDoc(m,rows){
+  const dic={},mp={};DK.forEach(k=>{dic[k]=[];mp[k]=new Map()});
+  const id=(k,v)=>{v=(v==null||String(v).trim()==='')?'—':String(v).trim();const key=v.toLowerCase();let i=mp[k].get(key);if(i===undefined){i=dic[k].length;dic[k].push(v);mp[k].set(key,i)}return i};
+  return{m,year:2026,count:rows.length,dic,rows:rows.map(r=>[id('pic',r[0]),id('state',r[1]),id('cause',r[2]),id('sub',r[3]),id('bld',r[4]),id('status',r[5]),r[6]]),
+    source:'baseline',sheet:'baseline (baked into page)',by:null,at:'2026-01-01T00:00:00.000Z'};
+}
 function buildData(){
   const old=D,keep={};
   if(old)for(const k in IDX)keep[k]=[...F[k]].map(i=>old[k][i]);
@@ -666,6 +705,7 @@ function applySnap(snap){
   snap.docs.forEach(s=>{if(s.id==='faultrate'){const x=s.data();if(x&&Array.isArray(x.rows))frd=x;return}const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
   for(const k of Object.keys(LIVE))if(!seen.has(+k))delete LIVE[k];
   FRLIVE=frd;
+  SEEDED=seen.size>0;
   buildData();render();renderAdmin();
 }
 
@@ -987,6 +1027,7 @@ function loadHist(){
     if(db){
       db.collection('ntt').onSnapshot(s=>{applySnap(s);resolveNames()},()=>{});
       loadHist();
+      seedBaseline();
     }
   }catch(e){}
   renderAdmin();
