@@ -44,3 +44,17 @@ docker run -d -p 8080:8080 -v "$PWD/data:/app/data" --restart unless-stopped noc
 
 Image is `python:3.12-alpine`, runs as uid 10001, has a `/api/health` healthcheck,
 and honours `PORT` if you need a different internal port.
+
+## Make
+
+```bash
+make help          # all targets
+make run PORT=8090 # local python server, foreground
+make up            # docker compose up -d --build (PORT=8080 by default)
+make ps check logs down
+make backup        # backups/ntt-<timestamp>.json
+make reset         # asks first: wipe data/ and re-seed the baked baseline
+make deploy        # dist/ -> Cloudflare Pages
+```
+
+`make run` and `make up` both take `PORT`; don't run both on the same port.
