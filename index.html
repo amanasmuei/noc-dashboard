@@ -270,6 +270,100 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .wait{font:500 12px var(--mono);color:var(--muted)}
 @media (max-width:980px){.adm-grid{grid-template-columns:minmax(0,1fr)}.adm{padding:14px 16px 32px}}
 
+/* ---------- polish layer: one type scale (11/12/13/16/22/28), one radius scale (6/8/12), one bar style.
+   Kept as a single appended block so it can be re-applied to a fresh export. Geometry read by the script
+   (.trend 220px, .frbars 76px, .fb .m 14px) is deliberately untouched. ---------- */
+:root{--canvas:#f5f6fb;--line:#e3e5f0;--track:#eceef7;--hover:#f4f5fc;--muted:#63627f;
+  --shadow:0 1px 2px rgba(6,1,58,.04),0 1px 3px rgba(6,1,58,.05)}
+.opts,.scr,.tw,.pv-w{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+
+/* header: quieter title, months as one segmented control, three matching 34px controls */
+.hd{position:relative;padding:12px 24px;gap:10px 24px;border-bottom:0}
+.hd::after{content:"";position:absolute;left:0;right:0;bottom:0;height:2px;background:linear-gradient(90deg,var(--brand),var(--orange))}
+.ttl h1{font-size:16px;font-weight:700;letter-spacing:.08em;line-height:1.25}
+.ttl p{margin-top:2px;letter-spacing:0}
+.months{gap:2px;padding:3px;border-radius:10px;background:rgba(255,255,255,.07)}
+.months button{padding:6px 11px;border-radius:7px;font-size:12px;border:0}
+.months button[aria-pressed="true"]{background:#fff;color:#06013a}
+.hd-r{gap:8px}
+.upb,.pill,.ib{height:34px;border-radius:8px;border:1px solid rgba(255,255,255,.22)}
+.upb{padding:0 12px;background:transparent;color:#fff;font-weight:500;font-size:12px}
+.upb:hover{background:rgba(255,255,255,.1);filter:none}
+.pill{display:inline-flex;align-items:center;padding:0 10px;background:transparent;color:var(--head-mute);font:500 11px var(--font);letter-spacing:.06em}
+.tabs{gap:24px;padding:0 24px}
+.tabs button{padding:12px 0 10px;font-weight:500;border-bottom-width:2px}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{font-weight:700}
+
+/* cards */
+.body{padding:20px 24px 40px}
+.card{border-radius:12px}
+.card-h{align-items:center;padding:14px 16px 0}
+.card-h span{text-align:right}
+.card-b{padding:10px 16px 14px}
+@media (min-width:1181px){.r2,.r3{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.95fr)}}
+
+/* filter rail */
+.rail-top{padding:12px 16px}
+.rail-top b{font-size:13px;letter-spacing:0;text-transform:none}
+.tagx{font:500 11px var(--font);letter-spacing:0;text-transform:none;padding:2px 8px;margin-left:6px}
+.clear{font-weight:500}
+.opt{padding:6px 8px;font-size:12px}
+.opt .bx{border-color:color-mix(in srgb,var(--muted) 55%,var(--surface))}
+.opt .c,.chip .c,.leg .p{font:500 11px var(--font);font-variant-numeric:tabular-nums}
+.chip{padding:5px 10px}
+
+/* KPI tiles */
+.kpi{padding:16px;gap:0}
+.kpi .v{font-size:28px;margin-top:8px}
+.kpi .v small{font-size:14px}
+.kpi .s{font-size:12px;margin-top:2px}
+
+/* one bar style everywhere: 8px, square at the baseline, 4px at the data end */
+.brow{padding:5px 6px}
+.brow .bar,.brow .bar i,td .db,td .db i{height:8px;border-radius:0 4px 4px 0}
+.leg{font-size:12px}
+td .db{flex:none;width:72px}
+thead th{border-bottom-width:1px}
+td{padding:7px 8px}
+tbody tr:last-child td{border-bottom:0}
+.tot{border-top-width:1px;padding:10px 8px 0}
+.tb .v{font-weight:500;color:var(--ink2)}
+.tb .m{font-size:11px;letter-spacing:0}
+.tb .col{max-width:28px}
+.fb .col{border-radius:3px 3px 0 0}
+.fb .m{font-size:10px}
+
+/* fault rate: tinted panels instead of boxes inside a box */
+.frp{border:0;border-radius:10px;background:var(--hover);padding:12px 14px 10px}
+.frp-h b{font-size:13px}
+.frp .big{font-size:22px}
+.frp .sub{min-height:32px}
+.fb:hover:not(:disabled){background:var(--track)}
+
+/* shared controls (also used on the Upload data tab) */
+.bdg{font-size:11px;font-weight:500;padding:3px 9px;gap:6px}
+.bdg::before{width:6px;height:6px}
+.iss .bdg{padding:2px 9px}
+.btn{padding:8px 14px;border-radius:8px;font-weight:500}
+.btn.sm{border-radius:6px}
+.stp{padding:16px 16px 0}
+.stp .n{width:24px;height:24px;font-size:12px;background:var(--sel);color:var(--accent-ink)}
+.stp h3{font-size:13px}
+.drop{border-width:1.5px}
+.reqs span{font:500 11px var(--font)}
+select{border-radius:6px}
+.res{border-radius:8px}
+#tip{padding:8px 10px;box-shadow:0 6px 20px rgba(6,1,58,.18)}
+
+@media (max-width:980px){
+  .hd{padding:12px 16px}.tabs{padding:0 16px}.body{padding:12px 16px 28px}
+  .months{flex-wrap:nowrap;max-width:100%;overflow-x:auto;scrollbar-width:none}
+  .months button{flex:none}
+}
+@media (max-width:640px){.kpi .v{font-size:24px}}
+@media (prefers-reduced-motion:no-preference){button{transition:background-color .15s ease,color .15s ease,border-color .15s ease}}
+
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -296,24 +390,24 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
   <aside class="rail" aria-label="Slicers">
     <div class="card"><div class="rail-top"><b>Filters <span class="tagx" id="fcount">0 active</span></b><span><button class="clear rt" id="rtog" aria-expanded="false">Show</button><button class="clear" id="clear" disabled>Clear all</button></span></div></div>
     <div class="card"><div class="card-h"><h3>State</h3></div><div class="card-b"><div class="opts tall" id="sl-state"></div></div></div>
-    <div class="card"><div class="card-h"><h3>NTT Status</h3></div><div class="card-b"><div class="chips" id="sl-status"></div></div></div>
-    <div class="card"><div class="card-h"><h3>Cause Code Category</h3></div><div class="card-b"><div class="opts tall" id="sl-cause"></div></div></div>
+    <div class="card"><div class="card-h"><h3>NTT status</h3></div><div class="card-b"><div class="chips" id="sl-status"></div></div></div>
+    <div class="card"><div class="card-h"><h3>Cause code category</h3></div><div class="card-b"><div class="opts tall" id="sl-cause"></div></div></div>
   </aside>
 
   <div class="main">
     <div class="kpis" id="kpis"></div>
     <div class="r2">
-      <div class="card"><div class="card-h"><h3>Number of NTT by Person in Charge</h3><span id="picN"></span></div><div class="card-b"><div class="scr" id="v-pic"></div></div></div>
-      <div class="card"><div class="card-h"><h3>Number of NTT by State</h3><span id="stN"></span></div><div class="card-b"><div class="scr" id="v-state"></div></div></div>
+      <div class="card"><div class="card-h"><h3>NTT by person in charge</h3><span id="picN"></span></div><div class="card-b"><div class="scr" id="v-pic"></div></div></div>
+      <div class="card"><div class="card-h"><h3>NTT by state</h3><span id="stN"></span></div><div class="card-b"><div class="scr" id="v-state"></div></div></div>
       <div class="card"><div class="card-h"><h3>NTT by MTTR category</h3><span>24-hour threshold</span></div><div class="card-b"><div class="donut" id="v-mttr"></div></div></div>
     </div>
     <div class="r3">
-      <div class="card"><div class="card-h"><h3>Sub Cause Code Category</h3><span>Number of NTT</span></div><div class="card-b" id="v-sub"></div></div>
-      <div class="card"><div class="card-h"><h3>Building ID</h3><span>Count of NTT No</span></div><div class="card-b" id="v-bld"></div></div>
+      <div class="card"><div class="card-h"><h3>Sub cause code category</h3><span>Number of NTT</span></div><div class="card-b" id="v-sub"></div></div>
+      <div class="card"><div class="card-h"><h3>Building ID</h3><span>Number of NTT</span></div><div class="card-b" id="v-bld"></div></div>
       <div class="card"><div class="card-h"><h3>Monthly trend</h3><span>Click a month</span></div><div class="card-b"><div class="trend" id="v-trend"></div></div></div>
     </div>
     <div class="card" id="c-fr" hidden>
-      <div class="card-h"><h3>Fault rate by technology</h3><span>Faulty equipment ÷ network elements · dashed line = target · click a bar to pick a month</span></div>
+      <div class="card-h"><h3>Fault rate by technology</h3><span>Faulty equipment ÷ network elements · dashed line = target</span></div>
       <div class="card-b"><div class="frg" id="v-fr"></div></div>
     </div>
   </div>
