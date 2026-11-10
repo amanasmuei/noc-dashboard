@@ -276,6 +276,8 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 :root{--canvas:#f5f6fb;--line:#e3e5f0;--track:#eceef7;--hover:#f4f5fc;--muted:#63627f;
   --shadow:0 1px 2px rgba(6,1,58,.04),0 1px 3px rgba(6,1,58,.05)}
 .opts,.scr,.tw,.pv-w{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+/* fade the last partially-visible row so scrolling lists don't look sliced off */
+.opts,.scr,.tw{mask-image:linear-gradient(to bottom,#000 calc(100% - 16px),transparent)}
 
 /* header: quieter title, months as one segmented control, three matching 34px controls */
 .hd{position:relative;padding:12px 24px;gap:10px 24px;border-bottom:0}
@@ -302,6 +304,10 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .card-h span{text-align:right}
 .card-b{padding:10px 16px 14px}
 @media (min-width:1181px){.r2,.r3{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.95fr)}}
+/* trend card fills the row height instead of leaving dead space below the chart */
+.r3>.card:last-child{display:flex;flex-direction:column}
+.r3>.card:last-child>.card-b{flex:1;display:flex;flex-direction:column;min-height:0}
+.r3 .trend{flex:1;height:auto;min-height:200px}
 
 /* filter rail */
 .rail-top{padding:12px 16px}
@@ -600,9 +606,10 @@ function renderTrend(){
   const c=new Array(12).fill(0);
   for(const r of D.rows)if(pass(r,'m'))c[r[0]]++;
   const mx=Math.max(1,...c);
+  const H=Math.max(80,($('#v-trend').clientHeight||250)-40);
   $('#v-trend').innerHTML=c.map((v,i)=>{
     const off=!HAS[i],dim=F.m!==null&&F.m!==i;
-    return `<button class="tb${off?' off':''}${dim?' dim':''}" ${off?'':`data-m="${i}"`} ${off?'':`data-tip="${esc(T(MN[i]+' 2026',[['NTT',v]]))}"`} aria-label="${MN[i]} ${v}"><span class="v num">${off?'':v}</span><span class="col" style="height:${off?6:v/mx*150}px"></span><span class="m">${MN[i]}</span></button>`;
+    return `<button class="tb${off?' off':''}${dim?' dim':''}" ${off?'':`data-m="${i}"`} ${off?'':`data-tip="${esc(T(MN[i]+' 2026',[['NTT',v]]))}"`} aria-label="${MN[i]} ${v}"><span class="v num">${off?'':v}</span><span class="col" style="height:${off?6:v/mx*H}px"></span><span class="m">${MN[i]}</span></button>`;
   }).join('');
 }
 $('#v-trend').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const i=+b.dataset.m;F.m=F.m===i?null:i;render()});
