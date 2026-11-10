@@ -183,6 +183,26 @@ code{font:400 12px var(--mono);background:var(--canvas);padding:1px 5px;border-r
 }
 @media (max-width:340px){.kpis{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:no-preference){.brow .bar i,.tb .col{transition:width .3s ease,height .3s ease}}
+/* fault rate */
+.frg{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;padding-top:6px}
+.frp{border:1px solid var(--line);border-radius:8px;padding:10px 12px 8px;min-width:0;background:var(--surface)}
+.frp-h{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.frp-h b{font-size:12.5px}
+.frp .big{font-size:24px;font-weight:700;letter-spacing:-.02em;line-height:1.2;margin-top:4px}
+.frp .sub{font-size:11px;color:var(--muted);margin-bottom:8px}
+.frbars{position:relative;display:flex;gap:2px;height:76px}
+.fb{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;border-radius:4px}
+.fb:hover:not(:disabled){background:var(--hover)}
+.fb .col{width:100%;max-width:14px;background:var(--mark);border-radius:2px 2px 0 0}
+.fb.over .col{background:var(--mark2)}
+.fb .m{height:14px;line-height:14px;font-size:9.5px;color:var(--muted)}
+.fb.dim .col{opacity:.35}
+.fb.off{cursor:default}
+.fb.off .col{height:4px!important;background:none;border:1px dashed var(--line)}
+.frt{position:absolute;left:0;right:0;border-top:1.5px dashed var(--ink2);opacity:.65;pointer-events:none}
+.frrow{display:flex;align-items:center;gap:10px;padding:10px 8px 2px;border-top:1px solid var(--line);margin-top:6px;font-size:12.5px;color:var(--ink2)}
+.frrow>div{flex:1;min-width:0}
+.frrow b{color:var(--ink)}
 /* admin */
 .upb{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;font-weight:700;font-size:12.5px;background:#fff;color:var(--head);white-space:nowrap}
 .upb:hover{filter:brightness(.93)}
@@ -292,6 +312,10 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
       <div class="card"><div class="card-h"><h3>Building ID</h3><span>Count of NTT No</span></div><div class="card-b" id="v-bld"></div></div>
       <div class="card"><div class="card-h"><h3>Monthly trend</h3><span>Click a month</span></div><div class="card-b"><div class="trend" id="v-trend"></div></div></div>
     </div>
+    <div class="card" id="c-fr" hidden>
+      <div class="card-h"><h3>Fault rate by technology</h3><span>Faulty equipment ÷ network elements · dashed line = target · click a bar to pick a month</span></div>
+      <div class="card-b"><div class="frg" id="v-fr"></div></div>
+    </div>
   </div>
 </div>
 
@@ -315,7 +339,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
           </div>
           <div class="fname" id="fname" hidden></div>
           <div class="reqs" aria-label="Required columns"><span>NTT No</span><span>Person In Charge</span><span>State</span><span>Cause Code Category</span><span>Sub Cause Code Category</span><span>Building ID</span><span>NTT Status</span><span>MTTR</span></div>
-          <p class="hint" style="padding:8px 0 0">MTTR is read as text such as “5 hours 17 minutes” or “1 days 17 hours 9 minutes”. Sheets without an “NTT No” column (KPI, Analysis) are skipped.</p>
+          <p class="hint" style="padding:8px 0 0">MTTR is read as text such as “5 hours 17 minutes” or “1 days 17 hours 9 minutes”. Sheets without an “NTT No” column are skipped, except that the Fault Rate table in the Analysis sheet is read for the Fault rate chart.</p>
         </div>
       </div>
       <div class="card" id="a-s2">
@@ -494,7 +518,7 @@ function render(){
   renderMonths();renderSlicers();renderKPIs();
   const np=barList('pic','#v-pic',{}),ns=barList('state','#v-state',{});
   $('#picN').textContent=np+' people';$('#stN').textContent=ns+' states';
-  renderDonut();renderTables();renderTrend();
+  renderDonut();renderTables();renderTrend();renderFR();
 }
 
 /* ---------- tooltip, tabs, theme ---------- */
@@ -532,12 +556,76 @@ function buildData(){
   if(F.m!==null&&!HAS[F.m])F.m=null;
 }
 function applySnap(snap){
-  const seen=new Set();
-  snap.docs.forEach(s=>{const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
+  const seen=new Set();let frd=null;
+  snap.docs.forEach(s=>{if(s.id==='faultrate'){const x=s.data();if(x&&Array.isArray(x.rows))frd=x;return}const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
   for(const k of Object.keys(LIVE))if(!seen.has(+k))delete LIVE[k];
+  FRLIVE=frd;
   buildData();render();renderAdmin();
 }
 
+/* ---------- fault rate ---------- */
+let FRLIVE=null;const FRBASE={"rows":[{"k":"ALL","t":0.0042,"v":[0.0017631196847127152,0.001451980916822236,0.0016594067620825555,0.0012445550715619166,0.0022816842978635138,0.0026965359883841526,0.0035262393694254304,0.0015556938394523958,null,null,null,null]},{"k":"DWDM","t":0.007,"v":[0.0044742729306487695,0.004154682007031001,0.0044742729306487695,0.003515500159795462,0.006711409395973154,0.00798977309044423,0.009268136784915308,0.0044742729306487695,null,null,null,null]},{"k":"SDH","t":0.001,"v":[0.000177210703526493,0.000354421407052986,0,0.000177210703526493,0,0.000354421407052986,0.000886053517632465,0,null,null,null,null]},{"k":"MW","t":0.01,"v":[0.0029154518950437317,0,0,0,0.0014577259475218659,0,0,0.0014577259475218659,null,null,null,null]},{"k":"PTN","t":0.0058,"v":[0,0,0.005434782608695652,0,0,0,0,0,null,null,null,null]}]};
+const frData=()=>FRLIVE||FRBASE;
+const fpct=x=>(x*100).toFixed(2)+'%';
+function renderFR(){
+  const card=$('#c-fr'),rows=(frData().rows||[]);
+  const rep=[];for(let m=0;m<12;m++)if(rows.some(r=>typeof r.v[m]==='number'))rep.push(m);
+  if(!rows.length||!rep.length){card.hidden=true;return}
+  card.hidden=false;
+  const PH=58,sel=F.m;
+  $('#v-fr').innerHTML=rows.map(r=>{
+    const vals=rep.map(m=>r.v[m]).filter(x=>typeof x==='number');
+    const avg=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
+    const cur=sel===null?avg:(typeof r.v[sel]==='number'?r.v[sel]:null);
+    const t=typeof r.t==='number'?r.t:null;
+    const name=r.k==='ALL'?'All':r.k;
+    const ymax=(Math.max(t||0,...vals)*1.15)||0.001;
+    const over=cur!==null&&t!==null&&cur>t;
+    const chip=cur===null?'':`<span class="bdg ${over?'c-warn':'c-good'}">${over?'Above target':'On target'}</span>`;
+    const sub=(sel===null?`YTD average · ${MN[rep[0]]}–${MN[rep[rep.length-1]]}`:MN[sel]+' 2026')+(t!==null?` · target ${fpct(t)}`:'');
+    const bars=r.v.map((v,m)=>{
+      const off=typeof v!=='number',dim=sel!==null&&sel!==m,ov=!off&&t!==null&&v>t;
+      if(off)return `<button class="fb off" disabled aria-label="${MN[m]} no data"><span class="col"></span><span class="m">${MN[m][0]}</span></button>`;
+      return `<button class="fb${dim?' dim':''}${ov?' over':''}" data-m="${m}" data-tip="${esc(T(MN[m]+' 2026 · '+name,[['Fault rate',fpct(v)],['Target',t===null?'–':fpct(t)]]))}" aria-label="${MN[m]} ${fpct(v)}"><span class="col" style="height:${Math.max(v/ymax*PH,1.5).toFixed(1)}px"></span><span class="m">${MN[m][0]}</span></button>`;
+    }).join('');
+    const line=t!==null?`<i class="frt" style="bottom:${(14+t/ymax*PH).toFixed(1)}px"></i>`:'';
+    return `<div class="frp"><div class="frp-h"><b>${esc(name)}</b>${chip}</div><div class="big num">${cur===null?'–':fpct(cur)}</div><div class="sub">${esc(sub)}</div><div class="frbars">${line}${bars}</div></div>`;
+  }).join('');
+}
+$('#c-fr').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const i=+b.dataset.m;F.m=F.m===i?null:i;render()});
+function parseFR(aoa){
+  let hr=-1,lc=-1;
+  for(let i=0;i<aoa.length&&hr<0;i++){const r=aoa[i]||[];for(let j=0;j<r.length;j++){if(/^fa\w{0,3}lt\s*rate$/i.test(String(r[j]==null?'':r[j]).trim())){hr=i;lc=j;break}}}
+  if(hr<0)return null;
+  const mc=[];(aoa[hr]||[]).forEach((c,j)=>{if(j>lc){const m=monthFromName(c);if(m>=0&&mc[m]===undefined)mc[m]=j}});
+  if(!mc.filter(x=>x!==undefined).length)return null;
+  const rows=[];
+  for(let i=hr+1;i<aoa.length&&rows.length<8;i++){
+    const r=aoa[i]||[],k=String(r[lc]==null?'':r[lc]).trim();
+    if(!k)break;
+    if(!mc.some(j=>j!==undefined&&typeof r[j]==='number'))break;
+    const v=Array(12).fill(null);
+    for(let m=0;m<12;m++){const x=mc[m]===undefined?null:r[mc[m]];v[m]=(typeof x==='number'&&isFinite(x))?x:null}
+    rows.push({k:k.slice(0,20),t:(lc>0&&typeof r[lc-1]==='number')?r[lc-1]:null,v});
+  }
+  if(!rows.length)return null;
+  for(let m=0;m<12;m++)if(!rows.some(r=>r.v[m]>0))rows.forEach(r=>{r.v[m]=null});
+  if(!rows.some(r=>r.v.some(x=>x!==null)))return null;
+  return rows;
+}
+function frUI(){
+  const f=ADM.fr;if(!f)return '';
+  const mo=[];for(let m=0;m<12;m++)if(f.rows.some(r=>r.v[m]!==null))mo.push(MN[m]);
+  const st=f.same?'<span class="bdg c-mute">No change</span>':'<span class="bdg c-warn">Changed</span>';
+  return `<div class="frrow"><input type="checkbox" id="fr-inc" aria-label="Include fault rate" ${ADM.frInc?'checked':''}><div><b>Fault rate</b> from sheet “${esc(f.sheet)}” · ${esc(f.rows.map(r=>r.k).join(', '))} · ${mo.length?esc(mo[0]+'–'+mo[mo.length-1]):'no months'}</div>${st}</div>`;
+}
+function frRow(){
+  const L=FRLIVE;
+  const tag=L?'<span class="bdg c-warn">Uploaded</span>':'<span class="bdg c-info">Original</span>';
+  const det=L?`<b>${esc(L.source||'file')}</b> · ${esc(fmtAt(L.at))}<br>by ${esc(nameOf(L.by))}`:'From the original workbook';
+  const act=L&&ADM.can?'<button class="btn ghost sm" data-rvfr="1" type="button">Revert</button>':'';
+  return `<div class="mrow" style="grid-template-columns:minmax(0,1fr) auto;border-top:1.5px solid var(--line);margin-top:4px"><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Fault rate</b>${tag}</div><div class="d">${det}</div></div><div>${act}</div></div>`;
+}
 /* ---------- admin: parsing ---------- */
 const ADM={can:false,dbOk:false,file:null,sheets:[],cur:0,busy:false,ids:[],names:{},hist:[]};
 const HEAD={ntt:['ntt no'],pic:['person in charge'],state:['state'],cause:['cause code category'],sub:['sub cause code category'],bld:['building id'],status:['ntt status'],mttr:['mttr']};
@@ -602,7 +690,7 @@ function analyseSheet(name,aoa){
   return S;
 }
 async function loadFile(f){
-  ADM.file=f;ADM.sheets=[];ADM.cur=0;$('#a-res').innerHTML='';
+  ADM.file=f;ADM.sheets=[];ADM.cur=0;ADM.fr=null;ADM.frInc=false;$('#a-res').innerHTML='';
   const fn=$('#fname');fn.hidden=false;fn.innerHTML=`<span>Reading <b>${esc(f.name)}</b>…</span>`;
   try{
     if(f.size>20*1024*1024)throw new Error('File is larger than 20 MB. Split it by month first.');
@@ -614,13 +702,15 @@ async function loadFile(f){
       const S=analyseSheet(/\.csv$/i.test(f.name)?f.name.replace(/\.csv$/i,''):n,aoa);
       if(/\.csv$/i.test(f.name)&&S.ok){const m=monthFromName(f.name);if(m>=0){S.month=m;S.include=true}}
       ADM.sheets.push(S);
+      if(!ADM.fr&&!/\.csv$/i.test(f.name)){const fr=parseFR(aoa);if(fr)ADM.fr={rows:fr,sheet:n}}
     }
     if(!ADM.sheets.length)throw new Error('The file has no sheets.');
+    if(ADM.fr){ADM.fr.same=JSON.stringify(frData().rows)===JSON.stringify(ADM.fr.rows);ADM.frInc=!ADM.fr.same}
     ADM.sheets.forEach(s=>{compare(s);s.include=s.ok&&s.month>=0&&s.cmp!=='same'});
     ADM.cur=Math.max(0,ADM.sheets.findIndex(s=>s.ok&&s.cmp!=='same'));if(ADM.cur<0)ADM.cur=Math.max(0,ADM.sheets.findIndex(s=>s.ok));
     fn.innerHTML=`<span><b>${esc(f.name)}</b> · ${(f.size/1024).toFixed(0)} KB · ${ADM.sheets.length} sheet${ADM.sheets.length>1?'s':''}, ${ADM.sheets.filter(s=>s.ok).length} with ticket data</span><button class="btn ghost sm" id="reset" type="button">Choose another file</button>`;
   }catch(e){
-    ADM.file=null;ADM.sheets=[];
+    ADM.file=null;ADM.sheets=[];ADM.fr=null;
     fn.innerHTML=`<span class="bdg c-bad">Could not read file</span><span>${esc(e.message||e)}</span>`;
   }
   renderAdmin();
@@ -663,12 +753,12 @@ function renderAdmin(){
     else{tag='<span class="bdg c-mute">No data</span>';det='Not reported yet'}
     const act=live&&ADM.can?`<button class="btn ghost sm" data-rv="${i}" type="button">${BASE_RAW[i].length?'Revert':'Remove'}</button>`:'';
     return`<div class="mrow"><span class="m">${m}</span><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tag}<span class="num" style="font-size:12.5px">${n?fmt(n)+' NTT':''}</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
-  }).join('');
+  }).join('')+frRow();
   // history
   const H=$('#a-hist');
   if(!ADM.can)$('#a-histc').hidden=true;else{
     $('#a-histc').hidden=false;
-    H.innerHTML=ADM.hist.length?ADM.hist.slice(0,8).map(h=>`<div><b>${h.kind==='revert'?'Reverted':'Published'} ${esc((h.months||[]).map(x=>MN[x]).join(', '))}</b>${h.file?' · '+esc(h.file):''}<small>${esc(fmtAt(h.at))} · ${esc(nameOf(h.by))}</small></div>`).join(''):'<p class="empty">No uploads yet.</p>';
+    H.innerHTML=ADM.hist.length?ADM.hist.slice(0,8).map(h=>`<div><b>${h.kind==='revert'?'Reverted':'Published'} ${esc([...(h.months||[]).map(x=>MN[x]),...(h.fr?['fault rate']:[])].join(', '))}</b>${h.file?' · '+esc(h.file):''}<small>${esc(fmtAt(h.at))} · ${esc(nameOf(h.by))}</small></div>`).join(''):'<p class="empty">No uploads yet.</p>';
   }
   // sheets
   const sh=$('#a-sheets');
@@ -677,7 +767,7 @@ function renderAdmin(){
   sh.innerHTML=`<div class="tw" style="max-height:none"><table class="sheets"><thead><tr><th style="width:34px"></th><th>Sheet</th><th>Month</th><th style="text-align:right">Tickets</th><th>Status</th></tr></thead><tbody>`+ADM.sheets.map((s,i)=>{
     const st=!s.ok?`<span class="bdg c-mute">Skipped</span>`:s.cmp==='same'&&!s.include?`<span class="bdg c-mute">No change</span>`:s.month<0?`<span class="bdg c-warn">Pick a month</span>`:clash.has(s.month)&&s.include?`<span class="bdg c-bad">Month clash</span>`:s.cmp==='chg'?`<span class="bdg c-warn">Changed</span>`:s.issues.some(x=>x.t==='warn')?`<span class="bdg c-warn">Check</span>`:`<span class="bdg c-good">${s.cmp==='new'?'New':'Ready'}</span>`;
     const opts=`<option value="-1">–</option>`+MN.map((m,j)=>`<option value="${j}"${s.month===j?' selected':''}>${m}</option>`).join('');
-    return`<tr data-s="${i}" class="${i===ADM.cur?'cur':''}"><td><input type="checkbox" data-inc="${i}" aria-label="Include ${esc(s.name)}" ${s.include?'checked':''} ${s.ok?'':'disabled'}></td><td>${esc(s.name)}${s.note?`<div class="d" style="font-size:11px;color:var(--muted)">${esc(s.note)}</div>`:''}</td><td>${s.ok?`<select data-mo="${i}" aria-label="Month for ${esc(s.name)}">${opts}</select>`:'–'}</td><td class="num" style="text-align:right">${s.ok?(s.cmp==='chg'?fmt(s.prev)+' → ':'')+fmt(s.total):'–'}</td><td>${st}</td></tr>`}).join('')+`</tbody></table></div>`;
+    return`<tr data-s="${i}" class="${i===ADM.cur?'cur':''}"><td><input type="checkbox" data-inc="${i}" aria-label="Include ${esc(s.name)}" ${s.include?'checked':''} ${s.ok?'':'disabled'}></td><td>${esc(s.name)}${s.note?`<div class="d" style="font-size:11px;color:var(--muted)">${esc(s.note)}</div>`:''}</td><td>${s.ok?`<select data-mo="${i}" aria-label="Month for ${esc(s.name)}">${opts}</select>`:'–'}</td><td class="num" style="text-align:right">${s.ok?(s.cmp==='chg'?fmt(s.prev)+' → ':'')+fmt(s.total):'–'}</td><td>${st}</td></tr>`}).join('')+`</tbody></table></div>`+frUI();
   // preview
   const S=ADM.sheets[ADM.cur],P=$('#a-preview');
   if(!S||!S.ok){P.innerHTML=`<p class="empty">${S&&S.issues.length?S.issues.map(x=>x.m).join(' '):'Select a sheet with ticket data to preview it.'}</p>`}
@@ -687,10 +777,10 @@ function renderAdmin(){
       (S.issues.length?`<div class="iss">`+S.issues.map(x=>`<div><span class="bdg ${x.t==='bad'?'c-bad':x.t==='warn'?'c-warn':'c-info'}">${x.t==='bad'?'Error':x.t==='warn'?'Check':'Note'}</span><span>${x.m}</span></div>`).join('')+`</div>`:'<div class="iss"><div><span class="bdg c-good">Clean</span><span>No problems found in this sheet.</span></div></div>');
   }
   // summary
-  const pl=plan(),tot=pl.reduce((a,s)=>a+s.total,0);
-  let msg=ADM.sheets.some(s=>s.ok&&s.cmp==='same')&&!pl.length?'Everything in this file is already on the dashboard. Nothing to publish.':'Nothing selected.',can=false;
+  const pl=plan(),tot=pl.reduce((a,s)=>a+s.total,0),frSel=!!(ADM.fr&&ADM.frInc);
+  let msg=ADM.sheets.some(s=>s.ok&&s.cmp==='same')&&!pl.length&&!frSel?'Everything in this file is already on the dashboard. Nothing to publish.':'Nothing selected.',can=false;
   if(clash.size)msg=`Two selected sheets use ${[...clash].map(i=>MN[i]).join(', ')}. Give each sheet its own month.`;
-  else if(pl.length){can=ADM.can&&ADM.dbOk&&!ADM.busy;msg=`<b>${pl.length} month${pl.length>1?'s':''}</b> (${pl.map(s=>MN[s.month]).join(', ')}) · <b>${fmt(tot)}</b> tickets. Only these months are written; the rest stay as they are.`}
+  else if(pl.length||frSel){can=ADM.can&&ADM.dbOk&&!ADM.busy;msg=(pl.length?`<b>${pl.length} month${pl.length>1?'s':''}</b> (${pl.map(s=>MN[s.month]).join(', ')}) · <b>${fmt(tot)}</b> tickets. Only these months are written; the rest stay as they are.`:'')+(frSel?(pl.length?' ':'')+'<b>Fault rate</b> table will be updated.':'')}
   const sm=$('#a-sum');sm.innerHTML=msg;
   $('#publish').disabled=!can;
   if(ADM.can&&!ADM.dbOk)sm.innerHTML+=' <span class="wait">Shared storage is not available in this view.</span>';
@@ -700,9 +790,10 @@ $('#drop').addEventListener('dragleave',()=>$('#drop').classList.remove('over'))
 $('#drop').addEventListener('drop',e=>{e.preventDefault();$('#drop').classList.remove('over');const f=e.dataTransfer.files[0];if(f&&ADM.can)loadFile(f)});
 $('#browse').addEventListener('click',()=>$('#file').click());
 $('#file').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)loadFile(f)});
-$('#fname').addEventListener('click',e=>{if(e.target.closest('#reset')){ADM.file=null;ADM.sheets=[];$('#fname').hidden=true;$('#a-res').innerHTML='';renderAdmin()}});
+$('#fname').addEventListener('click',e=>{if(e.target.closest('#reset')){ADM.file=null;ADM.sheets=[];ADM.fr=null;$('#fname').hidden=true;$('#a-res').innerHTML='';renderAdmin()}});
 $('#a-sheets').addEventListener('click',e=>{const tr=e.target.closest('tr[data-s]');if(!tr||e.target.closest('input,select'))return;ADM.cur=+tr.dataset.s;renderAdmin()});
-$('#a-sheets').addEventListener('change',e=>{
+$('#a-sheets').addEventListener('change',e=>{if(e.target.id==='fr-inc'){ADM.frInc=e.target.checked;$('#a-res').innerHTML='';renderAdmin();return}
+  
   const i=e.target.dataset.inc,j=e.target.dataset.mo;
   if(i!==undefined){ADM.sheets[+i].include=e.target.checked}
   if(j!==undefined){const s=ADM.sheets[+j];s.month=+e.target.value;compare(s);s.include=s.month>=0&&s.cmp!=='same'}
@@ -730,12 +821,15 @@ async function doPublish(){
       LIVE[S.month]=doc;done.push(S);
     }catch(e){fail.push([S,e])}
   }
+  let frDone=false,frFail=null;
+  if(ADM.fr&&ADM.frInc){try{const doc={rows:ADM.fr.rows,sheet:String(ADM.fr.sheet).slice(0,60),source:ADM.file.name.slice(0,120),by:ADM.me||null,at:new Date().toISOString()};await ADM.db.doc('ntt/faultrate').set(doc);FRLIVE=doc;frDone=true;ADM.fr.same=true;ADM.frInc=false}catch(e){frFail=e}}
   ADM.busy=false;
-  if(done.length){buildData();render();
-    await log({kind:'publish',at:new Date().toISOString(),by:ADM.me||null,file:ADM.file.name.slice(0,120),months:done.map(s=>s.month),counts:done.map(s=>s.total)});
+  if(done.length||frDone){buildData();render();
+    await log({kind:'publish',at:new Date().toISOString(),by:ADM.me||null,file:ADM.file.name.slice(0,120),months:done.map(s=>s.month),counts:done.map(s=>s.total),fr:frDone});
     loadHist()}
   if(fail.length)res('bad',`<b>${done.length?'Partly published.':'Not published.'}</b> ${fail.map(([s,e])=>`${MN[s.month]}: ${e&&e.message==='too large'?'sheet is too large for one month':e&&e.code==='permission_denied'?'you do not have permission to write data':'the save failed, try again'}`).join('; ')}.`);
-  else res('good',`<b>Published.</b> ${done.map(s=>MN[s.month]+' ('+fmt(s.total)+')').join(', ')} ${done.length>1?"are":"is"} now live on the dashboard. <button class="btn ghost sm" id="godash" type="button">View dashboard</button>`);
+  else if(frFail)res('bad','<b>Fault rate was not saved.</b> Try again.');
+  else res('good',`<b>Published.</b> ${[...done.map(s=>MN[s.month]+' ('+fmt(s.total)+')'),...(frDone?['fault rate']:[])].join(', ')} ${done.length+(frDone?1:0)>1?"are":"is"} now live on the dashboard. <button class="btn ghost sm" id="godash" type="button">View dashboard</button>`);
   ADM.sheets.forEach(s=>{compare(s);if(s.cmp==='same')s.include=false});
   renderAdmin();
 }
@@ -759,8 +853,17 @@ $('#a-months').addEventListener('click',async e=>{
   }catch(err){b.disabled=false;b.textContent='Failed';}
   renderAdmin();
 });
+$('#a-months').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-rvfr]');if(!b||!ADM.can||!ADM.db)return;
+  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Revert'}},4000);return}
+  b.disabled=true;
+  try{await ADM.db.doc('ntt/faultrate').delete();FRLIVE=null;render();
+    await log({kind:'revert',at:new Date().toISOString(),by:ADM.me||null,months:[],fr:true});loadHist();
+  }catch(err){b.disabled=false;b.textContent='Failed';}
+  renderAdmin();
+});
 async function resolveNames(){
-  const ids=new Set();Object.values(LIVE).forEach(d=>d.by&&ids.add(d.by));ADM.hist.forEach(h=>h.by&&ids.add(h.by));if(ADM.me)ids.add(ADM.me);
+  const ids=new Set();Object.values(LIVE).forEach(d=>d.by&&ids.add(d.by));if(FRLIVE&&FRLIVE.by)ids.add(FRLIVE.by);ADM.hist.forEach(h=>h.by&&ids.add(h.by));if(ADM.me)ids.add(ADM.me);
   const list=[...ids].filter(x=>!(x in ADM.names));if(!list.length||!ADM.user)return;
   try{const ps=await ADM.user.profiles(list);for(const k in ps)ADM.names[k]=ps[k].name||'a team member';renderAdmin()}catch(e){}
 }
