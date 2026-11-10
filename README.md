@@ -23,3 +23,24 @@ address reads and writes the same store, so an upload is the latest data for eve
 
 Works, but the store falls back to `localStorage` of that one browser: uploads do not
 cross browsers or machines, and clearing site data wipes them.
+
+## Docker
+
+```bash
+docker compose up -d --build          # http://localhost:8080
+docker compose logs -f
+docker compose down
+```
+
+Data lives in `./data` (bind-mounted to `/app/data`), so rebuilds never touch it.
+Reset = `docker compose down && rm -rf data && docker compose up -d`.
+
+Plain docker:
+
+```bash
+docker build -t noc-dashboard .
+docker run -d -p 8080:8080 -v "$PWD/data:/app/data" --restart unless-stopped noc-dashboard
+```
+
+Image is `python:3.12-alpine`, runs as uid 10001, has a `/api/health` healthcheck,
+and honours `PORT` if you need a different internal port.

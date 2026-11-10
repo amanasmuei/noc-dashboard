@@ -86,7 +86,7 @@ class Handler(SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     import sys
 
-    port = int(sys.argv[1]) if len(sys.argv) > 1 else 8080
+    port = int(sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PORT", "8080"))
     print(f"TNOC dashboard  ->  http://localhost:{port}")
     print(f"store: {DATA}")
     ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()

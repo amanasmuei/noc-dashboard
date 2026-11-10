@@ -474,21 +474,29 @@ select{border-radius:6px}
 /* Local mode: outside Claude, use serve.py's shared store (data/ntt.json).
    Opened with no server behind it (file://), fall back to localStorage for this browser only. */
 if(typeof window.claude==='undefined'){(function(){
-  const K='tnoc-local:', subs={}, st={remote:null};
+  const K='tnoc-local:', subs={}, st={remote:null,lastWrite:0,init:null};
   let cache={};
   const lsLoad=c=>{try{return JSON.parse(localStorage.getItem(K+c))||{}}catch(e){return{}}},
         lsSave=(c,o)=>{try{localStorage.setItem(K+c,JSON.stringify(o))}catch(e){throw new Error('too large')}};
   const map=c=>{if(!st.remote)return lsLoad(c);const o={};for(const p in cache)if(p.startsWith(c+'/'))o[p.slice(c.length+1)]=cache[p];return o};
   const snap=c=>{const o=map(c);return{docs:Object.keys(o).map(id=>({id,data:()=>o[id]}))}};
   const notify=c=>(subs[c]||[]).forEach(f=>{try{f(snap(c))}catch(e){}});
-  async function remote(){
-    if(st.remote!==null)return st.remote;
-    try{const r=await fetch('/api/all',{cache:'no-store'});if(!r.ok)throw 0;
-      cache=await r.json();st.remote=true;
-      setInterval(async()=>{try{const q=await fetch('/api/all',{cache:'no-store'});const v=await q.json();
-        if(JSON.stringify(v)!==JSON.stringify(cache)){cache=v;notify('ntt');notify('uploads')}}catch(e){}},5000);
-    }catch(e){st.remote=false;window.__storeErr=String(e&&e.message||e)}
-    return st.remote;
+  async function poll(){
+    const t0=Date.now();
+    try{const r=await fetch('/api/all',{cache:'no-store'});const v=await r.json();
+      if(st.lastWrite>t0)return;                /* response may predate our own write */
+      if(JSON.stringify(v)!==JSON.stringify(cache)){cache=v;notify('ntt');notify('uploads')}
+    }catch(e){}
+  }
+  function remote(){            /* one shared bootstrap: concurrent callers must not re-fetch and clobber cache */
+    if(st.remote!==null)return Promise.resolve(st.remote);
+    if(!st.init)st.init=(async()=>{
+      try{const r=await fetch('/api/all',{cache:'no-store'});if(!r.ok)throw 0;
+        cache=await r.json();st.remote=true;setInterval(poll,5000);
+      }catch(e){st.remote=false;window.__storeErr=String(e&&e.message||e)}
+      return st.remote;
+    })();
+    return st.init;
   }
   async function put(path,data,del){
     if(await remote()){                     /* shared store: optimistic cache, roll back if the write fails */
@@ -497,6 +505,7 @@ if(typeof window.claude==='undefined'){(function(){
       try{
         const r=await fetch('/api/doc',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({path,data,delete:!!del})});
         if(!r.ok)throw new Error('store '+r.status);
+        st.lastWrite=Date.now();
       }catch(e){had?cache[path]=old:delete cache[path];throw e}
       return;
     }
