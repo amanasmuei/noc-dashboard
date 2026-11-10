@@ -34,6 +34,7 @@ def save(store):
     with os.fdopen(fd, "w", encoding="utf-8") as f:
         json.dump(store, f, separators=(",", ":"), ensure_ascii=False)
     os.replace(tmp, DATA)
+    os.chmod(DATA, 0o644)   # host user must be able to copy the store for backup
 
 
 class Handler(SimpleHTTPRequestHandler):

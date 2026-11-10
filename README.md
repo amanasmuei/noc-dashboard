@@ -58,3 +58,17 @@ make deploy        # dist/ -> Cloudflare Pages
 ```
 
 `make run` and `make up` both take `PORT`; don't run both on the same port.
+
+## Raspberry Pi
+
+```bash
+make pi-check PI=aman@192.168.1.116                       # arch + docker + compose
+make pi       PI=aman@192.168.1.116 PI_DIR=/home/aman/noc  # sync, build, chown ./data, restart
+make pi-logs  PI=…   PI_DIR=…
+make pi-pull  PI=…   PI_DIR=…        # live store -> backups/ntt-pi-<ts>.json
+make pi-reset PI=…   PI_DIR=…        # wipe the store, re-seed on next page load
+```
+
+Run mode is `docker compose` on the Pi, `restart: unless-stopped`, so it comes back after reboot.
+The container runs as uid `10001`, so `./data` on the Pi is owned by that uid — use the targets
+above instead of editing files there by hand (or prefix with `sudo`).

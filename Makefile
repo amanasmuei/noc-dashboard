@@ -1,4 +1,4 @@
-.PHONY: help run up down logs build ps backup reset deploy dist check pi-check pi pi-logs pi-pull
+.PHONY: help run up down logs build ps backup reset deploy dist check pi-check pi pi-logs pi-pull pi-reset
 
 PORT ?= 8080
 PY   ?= python3
@@ -52,13 +52,20 @@ PI_DIR  ?= /home/pi/noc
 pi-check:                 ## is the Pi reachable and does it have docker + compose?
 	ssh -o ConnectTimeout=5 $(PI) 'uname -m; docker --version; docker compose version'
 
-pi:                       ## sync to the Pi and (re)build + restart the container there
+pi:                       ## sync to the Pi, build, fix ./data ownership, restart, show status
 	rsync -az --delete --exclude .git --exclude dist --exclude backups --exclude data \
 	  --exclude .DS_Store --exclude .wrangler --exclude 'TNOC Dashboard*' ./ $(PI):$(PI_DIR)/
-	ssh $(PI) 'cd $(PI_DIR) && docker compose up -d --build && docker compose ps'
+	ssh $(PI) 'cd $(PI_DIR) && docker compose build -q \
+	  && docker compose run --rm --no-deps --user root noc sh -c "chown -R 10001:10001 /app/data && chmod -R a+r /app/data" \
+	  && docker compose up -d && docker compose ps'
 
 pi-logs:                  ## follow the Pi container logs
 	ssh $(PI) 'cd $(PI_DIR) && docker compose logs -f --tail 50'
+
+pi-reset:                 ## DESTROY the Pi's store (asks first), then re-seed on next page load
+	@read -p "Delete the store on $(PI)? [y/N] " a; [ "$$a" = y ] || { echo aborted; exit 1; }
+	ssh $(PI) 'cd $(PI_DIR) && docker compose run --rm --no-deps --user root noc rm -f /app/data/ntt.json'
+	@echo "store cleared - open the dashboard once to re-seed the baseline"
 
 pi-pull:                  ## copy the Pi's live store down into backups/
 	@mkdir -p backups && ssh $(PI) 'cat $(PI_DIR)/data/ntt.json' > backups/ntt-pi-$$(date +%Y%m%d-%H%M%S).json && ls -1t backups | head -1
