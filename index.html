@@ -54,7 +54,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;paddin
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 
 /* dashboard body */
-.body{display:grid;grid-template-columns:264px minmax(0,1fr);gap:16px;padding:16px 24px 32px;max-width:1500px;margin:0 auto}
+.body{display:grid;grid-template-columns:264px minmax(0,1fr);gap:16px;padding:16px 24px 32px}
 .rail{display:flex;flex-direction:column;gap:12px;align-self:start;position:sticky;top:12px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-width:0}
 .card-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 14px 0}
@@ -207,7 +207,7 @@ code{font:400 12px var(--mono);background:var(--canvas);padding:1px 5px;border-r
 .upb{display:inline-flex;align-items:center;gap:7px;padding:7px 13px;border-radius:9px;font-weight:700;font-size:12.5px;background:#fff;color:var(--head);white-space:nowrap}
 .upb:hover{filter:brightness(.93)}
 @media (max-width:700px){.upb span{display:none}.upb{padding:9px}}
-.adm{max-width:1240px;margin:0 auto;padding:20px 24px 48px;display:flex;flex-direction:column;gap:16px}
+.adm{padding:20px 24px 48px;display:flex;flex-direction:column;gap:16px}
 .adm-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:10px 20px}
 .adm-h h2{font-size:20px;font-weight:700}
 .adm-h p{color:var(--muted);font-size:13px;margin-top:2px}
