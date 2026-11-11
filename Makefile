@@ -46,8 +46,8 @@ deploy: dist              ## publish dist/ to Cloudflare Pages
 	npx wrangler pages deploy dist --project-name noc-dashboard --branch main
 
 # --- Raspberry Pi -------------------------------------------------------------------
-PI      ?= pi@raspberrypi.local
-PI_DIR  ?= /home/pi/noc
+PI      ?= aman@192.168.1.116
+PI_DIR  ?= /home/aman/noc
 
 pi-check:                 ## is the Pi reachable and does it have docker + compose?
 	ssh -o ConnectTimeout=5 $(PI) 'uname -m; docker --version; docker compose version'
