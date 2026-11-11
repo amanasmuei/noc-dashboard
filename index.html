@@ -54,15 +54,12 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;paddin
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 
 /* dashboard body */
-.body{display:grid;grid-template-columns:264px minmax(0,1fr);gap:16px;padding:16px 24px 32px}
-.rail{display:flex;flex-direction:column;gap:12px;align-self:start;position:sticky;top:12px}
+.body{display:block;padding:16px 24px 32px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow);min-width:0}
 .card-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:12px 14px 0}
 .card-h h3{font-size:13px;font-weight:700;letter-spacing:.005em}
 .card-h span{font-size:11px;color:var(--muted)}
 .card-b{padding:8px 14px 12px}
-.rail-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px}
-.rail-top b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
 .clear{font-size:12px;font-weight:700;color:var(--accent-ink);padding:4px 8px;border-radius:6px}
 .clear:hover{background:var(--sel)}
 .rt{display:none}
@@ -100,6 +97,70 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;paddin
 
 .r2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.95fr);gap:16px}
 .r3{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,.9fr);gap:16px}
+
+
+/* heatmap, hotspots, avoidability */
+.gr2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:16px;align-items:start}
+.gr2>.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.hm{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed;font-size:11.5px}
+.hm th{font-weight:500;color:var(--muted);font-size:10px;line-height:1.2;vertical-align:bottom;padding:0 2px 4px;word-break:break-word}
+.hm th.rh{text-align:left;width:92px;font-size:11.5px;color:var(--ink2);vertical-align:middle;padding:0}
+.hm th.cd{opacity:.45}
+.hm td{text-align:center;height:30px;border-radius:5px;border:0;padding:0;font-weight:500;color:var(--ink);cursor:pointer}
+.hm td.z{background:var(--canvas);color:transparent;cursor:default}
+.hm td.hi{color:#fff}
+.hm td.tot{background:none;font-weight:700;cursor:default;vertical-align:middle;text-align:right;padding-right:4px}
+.hm td.dim{opacity:.4}
+.hm td:not(.z):not(.tot):hover{outline:2px solid var(--orange)}
+.hot{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;width:100%;text-align:left;padding:8px 6px;border-radius:8px;border-bottom:1px solid var(--line)}
+.hot:hover{background:var(--hover)}
+.hot b{font-size:12.5px;color:var(--ink)}
+.hot .d{font-size:13px;font-weight:700;color:var(--bad);text-align:right}
+.hot .s{font-size:11px;color:var(--muted);grid-column:1/3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hd2{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;margin:12px 0 2px}
+.stk{display:flex;height:14px;border-radius:7px;overflow:hidden;background:var(--track)}
+.stk i{display:block;height:100%}
+.av{display:grid;grid-template-columns:92px minmax(0,1fr) 34px;gap:8px;align-items:center;padding:3px 0;font-size:11.5px;color:var(--ink2)}
+.av .n{text-align:right;font-weight:700;color:var(--ink)}
+.avl{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 10px;font-size:11px;color:var(--ink2)}
+.avl i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}
+@media (max-width:980px){.gr2{grid-template-columns:minmax(0,1fr)}}
+/* geo: tile-map of states + root-cause panel */
+.geo{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:22px;align-items:start}
+.mm{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.mm button{font-size:12px;padding:5px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink2)}
+.mm button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:500}
+:root[data-theme="dark"] .mm button[aria-pressed="true"]{background:var(--mark);border-color:var(--mark);color:var(--on-accent)}
+.tiles{padding:8px 10px 10px;border-radius:12px;background:var(--canvas)}
+.tiles svg{display:block;width:100%;height:auto}
+.msh{stroke:var(--surface);stroke-width:.8;stroke-linejoin:round;cursor:pointer;transition:opacity .15s}
+.msh.zero{fill:var(--track)}
+.msh:hover{stroke:var(--orange);stroke-width:1.6}
+.msh.sel{stroke:var(--orange);stroke-width:2.2}
+.msh.dim{opacity:.4}
+.mlb{font-size:11px;font-weight:500;fill:var(--ink);text-anchor:middle;pointer-events:none}
+.mlb.v{font-size:15px;font-weight:700}
+.mlb.hi{fill:#fff}
+.msea{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;fill:var(--muted);text-anchor:middle}
+.mch{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+.mch button{display:flex;align-items:center;gap:6px;font-size:11px;padding:3px 9px 3px 7px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink2)}
+.mch button i{display:block;width:9px;height:9px;border-radius:50%}
+.mch button b{color:var(--ink)}
+.mch button[aria-pressed="true"]{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
+.mch button.dim{opacity:.5}
+.gleg{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.gleg i{display:block;width:90px;height:8px;border-radius:4px;background:linear-gradient(90deg,color-mix(in srgb,var(--mark) 12%,var(--surface)),var(--mark))}
+.gw h4{margin:0 0 8px;font-size:15px;color:var(--ink)}
+.gw .st{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.gw .st div{background:var(--canvas);border-radius:8px;padding:8px 10px}
+.gw .st b{display:block;font-size:18px}
+.gw .st span{font-size:10.5px;color:var(--muted)}
+.gw .ins{font-size:12.5px;line-height:1.5;color:var(--ink2);background:var(--sel);border-left:3px solid var(--orange);padding:9px 12px;border-radius:0 8px 8px 0;margin:0 0 14px}
+.gw h5{margin:12px 0 4px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.gw .brow{grid-template-columns:minmax(0,170px) minmax(0,1fr) 34px}
+.gw .rg{font-size:11.5px;color:var(--muted);margin-top:10px}
+@media (max-width:980px){.geo{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.gw .st{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .scr{max-height:320px;overflow-y:auto;padding-right:4px}
 .brow{display:grid;grid-template-columns:minmax(0,132px) minmax(0,1fr) 34px;align-items:center;gap:10px;padding:3px 6px;border-radius:6px;width:100%}
 .brow:hover{background:var(--hover)}
@@ -165,20 +226,15 @@ code{font:400 12px var(--mono);background:var(--canvas);padding:1px 5px;border-r
   .r2,.r3{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 }
 @media (max-width:980px){
-  .body{grid-template-columns:minmax(0,1fr);padding:12px 16px 28px}
-  .rail{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  .rail>.card:first-child{grid-column:1/-1}
-  .rt{display:inline-block}
-  .rail:not(.open)>.card:not(:first-child){display:none}
-  .hd{padding:12px 16px}.tabs{padding:8px 16px 0}
+  .body{padding:12px 16px 28px}
+    .hd{padding:12px 16px}.tabs{padding:8px 16px 0}
   .months{margin-left:0}
   .g2{grid-template-columns:1fr}
 }
 @media (max-width:640px){
   .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
   .r2,.r3{grid-template-columns:minmax(0,1fr)}
-  .rail{grid-template-columns:minmax(0,1fr)}
-  .ttl h1{font-size:18px}
+    .ttl h1{font-size:18px}
   .kpi .v{font-size:26px}
 }
 @media (max-width:340px){.kpis{grid-template-columns:minmax(0,1fr)}}
@@ -312,11 +368,27 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .hd{position:sticky;top:0;z-index:30}
 .tabs{position:sticky;top:var(--hdh,64px);z-index:29}
 /* rail scrolls with the page: it is nearly as tall as the page, so pinning it under a fixed header only drifts */
-.rail{position:static}
 
-/* filter rail */
-.rail-top{padding:12px 16px}
-.rail-top b{font-size:13px;letter-spacing:0;text-transform:none}
+
+/* filter bar: right side of the tab row */
+.tabs{align-items:center;flex-wrap:wrap}
+.fctl{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 0}
+.fctl .chip{padding:4px 10px;font-size:12px}
+.fctl .sep{width:1px;height:18px;background:var(--line)}
+.dd{position:relative}
+.dd>summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--ink2);background:var(--surface)}
+.dd>summary::-webkit-details-marker{display:none}
+.dd>summary:after{content:"";border:4px solid transparent;border-top-color:currentColor;margin-top:4px}
+.dd[open]>summary{border-color:var(--accent)}
+.dd.on>summary{background:var(--sel);color:var(--ink);font-weight:500}
+.dd .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;width:310px;max-height:340px;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(6,1,58,.18);padding:6px}
+.fctl .clear{padding:4px 8px}
+.fact{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:-4px 0 12px;font-size:12px;color:var(--muted)}
+.fact button{display:inline-flex;align-items:center;gap:6px;padding:3px 6px 3px 10px;border-radius:999px;background:var(--sel);color:var(--ink);font-size:12px}
+.fact button:hover{background:var(--line)}
+.fact button i{font-style:normal;font-size:14px;line-height:1;opacity:.7}
+@media (max-width:980px){.fctl{margin-left:0;width:100%;padding:0 0 8px}.dd .pop{left:0;right:auto;max-width:calc(100vw - 32px)}}
+/* filter rail (legacy styles reused by dropdown rows) */
 .tagx{font:500 11px var(--font);letter-spacing:0;text-transform:none;padding:2px 8px;margin-left:6px}
 .clear{font-weight:500}
 .opt{padding:6px 8px;font-size:12px}
@@ -395,18 +467,28 @@ select{border-radius:6px}
 <div class="tabs" role="tablist">
   <button role="tab" aria-selected="true" data-v="dash">Dashboard</button>
   <button role="tab" aria-selected="false" data-v="admin">Upload data</button>
+  <div class="fctl" id="fctl" aria-label="Filters"></div>
 </div>
 
 <div id="v-dash" class="body">
-  <aside class="rail" aria-label="Slicers">
-    <div class="card"><div class="rail-top"><b>Filters <span class="tagx" id="fcount">0 active</span></b><span><button class="clear rt" id="rtog" aria-expanded="false">Show</button><button class="clear" id="clear" disabled>Clear all</button></span></div></div>
-    <div class="card"><div class="card-h"><h3>State</h3></div><div class="card-b"><div class="opts tall" id="sl-state"></div></div></div>
-    <div class="card"><div class="card-h"><h3>NTT status</h3></div><div class="card-b"><div class="chips" id="sl-status"></div></div></div>
-    <div class="card"><div class="card-h"><h3>Cause code category</h3></div><div class="card-b"><div class="opts tall" id="sl-cause"></div></div></div>
-  </aside>
 
   <div class="main">
+    <div class="fact" id="fact" hidden></div>
     <div class="kpis" id="kpis"></div>
+    <div class="card" id="c-geo">
+      <div class="card-h"><h3>Where &amp; why</h3><span>Click a state to see its root causes · Selangor includes PJ, MSC, Barat, Timur &amp; Putrajaya</span></div>
+      <div class="card-b geo">
+        <div><div class="mm" id="geo-mm"></div><div class="tiles" id="geo-tiles"></div><div class="gleg" id="geo-leg"></div></div>
+        <div class="gw" id="geo-why"></div>
+      </div>
+    </div>
+    <div class="gr2">
+      <div class="card"><div class="card-h"><h3>State × root cause</h3><span>Click a cell to drill in</span></div><div class="card-b"><div id="v-hm"></div></div></div>
+      <div class="col">
+        <div class="card"><div class="card-h"><h3>Needs attention</h3><span id="hotN"></span></div><div class="card-b" id="v-hot"></div></div>
+        <div class="card"><div class="card-h"><h3>Avoidable vs equipment</h3><span>by sub cause</span></div><div class="card-b" id="v-av"></div></div>
+      </div>
+    </div>
     <div class="r2">
       <div class="card"><div class="card-h"><h3>NTT by person in charge</h3><span id="picN"></span></div><div class="card-b"><div class="scr" id="v-pic"></div></div></div>
       <div class="card"><div class="card-h"><h3>NTT by state</h3><span id="stN"></span></div><div class="card-b"><div class="scr" id="v-state"></div></div></div>
@@ -571,21 +653,40 @@ function optList(k,el,sortFn){
   return items.map(x=>`<button class="opt${x.v?'':' zero'}" data-k="${k}" data-i="${x.i}" aria-pressed="${F[k].has(x.i)}"><span class="bx"><svg><use href="#i-tick"/></svg></span><span class="t" title="${esc(x.n)}">${esc(x.n)}</span><span class="c num">${x.v}</span></button>`).join('');
 }
 function renderSlicers(){
-  $('#sl-state').innerHTML=optList('state').replace(/>—</g,'>(blank)<');
-  $('#sl-cause').innerHTML=optList('cause').replace(/>—</g,'>(blank · still open)<');
+  const ctl=$('#fctl'),open=new Set([...ctl.querySelectorAll('details[open]')].map(d=>d.dataset.dd));
   const c=counts('status');
   const order=['Closed','Resolved','Open'].map(n=>D.status.indexOf(n)).filter(i=>i>=0);
-  $('#sl-status').innerHTML=order.map(i=>`<button class="chip" data-k="status" data-i="${i}" aria-pressed="${F.status.has(i)}">${D.status[i]}<span class="c num">${c.get(i)||0}</span></button>`).join('');
-  const n=activeCount()+(F.m!==null?0:0);
-  $('#fcount').textContent=n+' active';
-  $('#clear').disabled=n===0;
+  const st=order.map(i=>`<button class="chip" data-k="status" data-i="${i}" aria-pressed="${F.status.has(i)}">${D.status[i]}<span class="c num">${c.get(i)||0}</span></button>`).join('');
+  const dd=(id,label,n,body)=>`<details class="dd${n?' on':''}" data-dd="${id}"${open.has(id)?' open':''}><summary>${label}${n?` · ${n}`:''}</summary><div class="pop"><div class="opts" style="max-height:none;mask-image:none">${body}</div></div></details>`;
+  const cause=optList('cause').replace(/>—</g,'>(blank · still open)<');
+  /* region picker: only when exactly one rolled-up state with several regions is selected */
+  let reg='';
+  const gx=geoIdx(),sg=GEO.map((_,g)=>g).filter(g=>gx.mem[g].length>0&&gx.mem[g].every(i=>F.state.has(i)));
+  const rg=sg.length===1?gx.mem[sg[0]]:(F.state.size?gx.mem.find(m=>m.length>1&&[...F.state].every(i=>m.includes(i))):null);
+  if(rg&&rg.length>1){const cs=counts('state','state');reg=dd('reg','Region',rg.filter(i=>F.state.size<rg.length&&F.state.has(i)).length,rg.slice().sort((a,b)=>(cs.get(b)||0)-(cs.get(a)||0)).map(i=>`<button class="opt${cs.get(i)?'':' zero'}" data-k="state" data-i="${i}" aria-pressed="${F.state.has(i)}"><span class="bx"><svg><use href="#i-tick"/></svg></span><span class="t">${esc(D.state[i])}</span><span class="c num">${cs.get(i)||0}</span></button>`).join(''))}
+  const n=activeCount();
+  ctl.innerHTML=`<span class="chips">${st}</span><span class="sep"></span>${dd('cause','Cause',F.cause.size,cause)}${reg}<button class="clear" id="clear" ${n?'':'disabled'}>Clear all</button>`;
+  /* active filters strip */
+  const L={cause:'Cause',pic:'PIC',sub:'Sub cause',bld:'Building',gt:'MTTR'};
+  const chips=[];
+  if(F.state.size){
+    const done=new Set();
+    GEO.forEach((g,gi_)=>{const m=gx.mem[gi_];if(m.length&&m.every(i=>F.state.has(i))){m.forEach(i=>done.add(i));chips.push(`<button data-rmg="${gi_}" aria-label="Remove ${esc(g.n)}">${esc(g.n)} <i>×</i></button>`)}});
+    F.state.forEach(i=>{if(!done.has(i))chips.push(`<button data-k="state" data-i="${i}">${esc(D.state[i]==='—'?'(blank state)':D.state[i])} <i>×</i></button>`)});
+  }
+  for(const k in L)F[k].forEach(i=>chips.push(`<button data-k="${k}" data-i="${i}">${L[k]}: ${esc(k==='gt'?(i===0?'under 24 h':'over 24 h'):D[k][i]==='—'?'(blank)':D[k][i])} <i>×</i></button>`));
+  const fa=$('#fact');fa.hidden=!chips.length;fa.innerHTML=chips.length?`<span>Filtered by</span>${chips.join('')}`:'';
 }
 document.addEventListener('click',e=>{
   const b=e.target.closest('[data-k]');
   if(b&&b.dataset.i!==undefined){toggle(b.dataset.k,+b.dataset.i)}
 });
-$('#rtog').addEventListener('click',()=>{const r=document.querySelector('.rail');const o=r.classList.toggle('open');$('#rtog').textContent=o?'Hide':'Show';$('#rtog').setAttribute('aria-expanded',o)});
-$('#clear').addEventListener('click',()=>{for(const k in IDX)F[k].clear();render()});
+document.addEventListener('click',e=>{
+  if(e.target.closest('#clear')){for(const k in IDX)F[k].clear();render();return}
+  const rm=e.target.closest('[data-rmg]');if(rm){geoIdx().mem[+rm.dataset.rmg].forEach(i=>F.state.delete(i));render();return}
+  document.querySelectorAll('.dd[open]').forEach(d=>{if(!d.contains(e.target))d.open=false});
+});
+addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.dd[open]').forEach(d=>d.open=false)});
 
 /* ---------- KPI ---------- */
 function renderKPIs(){
@@ -650,9 +751,165 @@ function renderTrend(){
 }
 $('#v-trend').addEventListener('click',e=>{const b=e.target.closest('[data-m]');if(!b)return;const i=+b.dataset.m;F.m=F.m===i?null:i;render()});
 
+/* ---------- geo: state tile-map + root-cause panel ---------- */
+const GEO=[
+ {id:'KDH',n:'Kedah/Perlis',c:1,r:1,m:['KEDAH & PERLIS']},{id:'KTN',n:'Kelantan',c:3,r:1,m:['KELANTAN']},
+ {id:'PNG',n:'P. Pinang',c:1,r:2,m:['PULAU PINANG']},{id:'PRK',n:'Perak',c:2,r:2,m:['PERAK']},{id:'TRG',n:'Terengganu',c:3,r:2,m:['TERENGGANU']},
+ {id:'SEL',n:'Selangor',c:1,r:3,m:['SELANGOR BARAT','SELANGOR TIMUR','PETALING JAYA','MSC']},{id:'KUL',n:'K. Lumpur',c:2,r:3,m:['KUALA LUMPUR']},{id:'PHG',n:'Pahang',c:3,r:3,m:['PAHANG']},
+ {id:'MLK',n:'Melaka',c:1,r:4,m:['MELAKA']},{id:'NSN',n:'N. Sembilan',c:2,r:4,m:['NEGERI SEMBILAN']},{id:'JHR',n:'Johor',c:2,r:5,m:['JOHOR']},
+ {id:'SBH',n:'Sabah',c:6,r:2,m:['SABAH']},{id:'SWK',n:'Sarawak',c:5,r:3,m:['SARAWAK']}
+];
+const GEOSHAPE={"w":729,"h":395,"pw":290,"p":{"KUL":"M105.4 243.5L107.3 242.4L107.8 243.5L111.0 244.4L111.8 243.2L112.6 243.2L112.4 244.4L113.8 246.2L113.1 247.2L112.1 247.1L112.2 248.0L113.2 248.2L112.3 251.4L113.4 252.0L113.2 255.6L111.9 255.6L111.9 256.9L110.7 255.7L107.6 256.6L106.9 255.3L106.2 255.4L106.1 254.4L107.0 253.7L107.1 250.3L105.9 250.5L103.8 248.7L104.2 245.6Z","KDH":"M5.3 32.5L3.4 30.4L0.0 21.6L2.7 17.4L2.8 10.4L4.4 10.4L3.1 5.3L4.0 4.9L3.5 2.0L5.7 0.0L7.8 2.6L12.0 1.1L14.2 4.3L13.3 8.5L17.2 12.8L17.1 18.9L12.8 22.1ZM15.2 79.9L14.6 74.1L17.5 73.6L19.4 74.9L15.8 70.9L17.4 65.5L15.8 52.3L14.1 47.2L11.1 43.5L10.3 38.8L5.3 32.5L12.8 22.1L17.1 18.9L17.2 12.8L20.8 14.3L26.0 13.9L26.0 15.3L29.8 16.9L30.9 16.0L37.1 19.5L39.2 18.9L42.8 15.0L43.7 18.6L48.1 19.6L49.0 22.5L48.6 25.9L50.5 28.6L49.5 30.3L50.8 34.2L52.3 33.8L52.3 32.4L54.1 34.1L57.2 33.4L59.2 30.9L63.3 33.5L67.7 32.1L69.6 37.1L67.2 38.1L64.9 40.9L70.0 42.9L68.0 47.1L69.0 47.7L68.4 51.3L69.5 52.3L66.7 56.9L63.0 56.3L60.3 65.7L57.3 66.6L59.6 70.4L59.0 74.8L55.2 78.0L57.5 79.9L56.2 85.5L51.6 87.0L51.0 96.3L48.3 98.0L43.0 98.0L41.7 101.8L39.4 103.2L37.3 107.7L35.0 108.5L34.0 111.2L32.1 113.4L29.9 114.4L27.1 113.3L27.7 111.9L25.9 111.1L25.9 109.4L28.7 110.5L29.8 110.1L28.0 95.4L28.3 81.4L20.3 80.7L17.5 79.5L17.3 80.4Z","SBH":"M561.1 146.3L567.5 138.9L558.7 131.0L569.5 118.0L575.2 122.2L581.4 119.4L581.8 112.7L588.3 109.2L591.4 94.7L615.5 69.7L619.5 55.7L622.1 61.2L619.5 75.6L629.8 71.6L632.9 58.8L636.2 57.6L641.0 60.9L643.4 74.9L650.0 76.6L652.6 74.7L661.7 82.3L661.7 91.3L655.3 93.9L659.6 105.8L674.6 98.7L679.1 107.5L718.2 127.0L722.0 124.6L727.3 127.9L728.7 136.3L719.4 142.2L694.8 148.4L688.2 143.9L679.1 149.6L685.5 160.3L707.0 168.9L696.3 172.7L672.0 178.7L657.2 171.8L658.4 176.5L656.1 180.8L649.9 180.2L641.0 172.0L631.0 174.0L611.3 171.9L605.6 175.5L602.4 171.5L593.6 171.6L590.2 176.4L581.8 171.5L578.6 178.7L576.4 177.6L572.4 183.4L570.4 180.6L572.4 174.5L568.5 172.5L567.0 161.8L572.0 154.6L569.7 145.4Z","SEL":"M108.3 261.4L109.0 262.2L108.9 261.3L109.9 261.1L109.8 262.2L112.0 262.5L112.0 264.3L110.2 264.3L108.9 266.9L108.0 268.0L106.9 266.4L107.8 265.3L108.0 262.8L107.1 261.9ZM110.7 287.6L109.1 287.7L108.3 286.4L94.2 280.8L89.2 273.0L81.3 270.8L80.8 267.9L79.8 266.9L83.4 261.4L86.2 259.5L86.0 254.3L83.2 251.3L81.6 241.5L79.3 237.7L74.0 234.9L72.8 232.0L67.4 224.4L64.9 217.7L59.7 212.7L56.2 211.4L53.8 207.1L51.6 205.7L48.6 205.2L47.7 203.3L48.3 200.2L57.4 198.8L56.8 201.5L59.5 202.0L59.5 203.1L58.0 204.1L59.8 206.0L60.4 203.7L63.0 203.5L63.5 204.5L65.1 203.9L65.1 207.0L67.4 205.0L66.2 208.3L70.7 208.2L75.9 209.9L78.3 209.4L78.2 212.3L80.5 212.9L84.7 211.3L85.2 209.9L83.8 207.0L83.6 204.6L87.2 203.7L88.1 205.5L92.0 207.3L94.0 210.0L97.5 211.6L99.9 210.5L103.1 205.4L104.6 205.7L106.5 208.8L109.1 210.1L112.4 209.7L112.4 210.8L114.2 212.0L115.6 215.2L117.6 217.4L117.1 221.1L115.7 221.4L114.0 224.5L116.1 229.8L114.0 231.4L113.9 233.4L115.4 234.5L115.4 235.8L116.6 236.2L117.8 238.3L120.4 240.2L126.0 241.9L126.9 245.1L126.5 246.6L128.1 249.8L127.0 251.6L128.5 257.6L127.5 257.6L125.8 259.6L122.5 268.6L113.2 268.4L114.0 279.8L112.5 282.3L112.9 283.5L111.4 284.8L111.8 286.0L110.5 286.0L109.8 287.0Z","SWK":"M311.0 272.9L311.8 278.4L325.1 289.4L347.5 287.3L347.8 293.0L359.4 295.9L361.6 292.5L369.9 296.8L370.6 290.1L376.4 287.8L374.2 284.9L378.5 271.0L378.5 258.4L381.8 256.9L382.6 241.4L385.7 242.1L387.3 247.6L398.5 239.5L456.0 225.7L476.5 198.7L491.7 183.0L498.9 174.1L498.7 162.7L503.9 162.7L510.8 165.6L514.4 177.2L519.4 176.5L527.0 187.7L535.1 182.5L538.9 170.6L535.8 169.1L533.0 156.5L542.0 152.5L544.5 149.6L545.7 154.0L544.7 155.7L547.8 171.9L556.2 173.7L557.5 175.5L559.4 173.3L555.6 169.3L555.8 160.6L553.7 155.1L553.6 153.1L549.0 148.1L551.2 147.3L551.1 146.1L553.8 145.8L554.1 147.9L557.8 148.7L559.9 147.9L561.1 146.3L569.7 145.4L572.0 154.6L567.0 161.8L568.5 172.5L572.4 174.5L570.4 180.6L572.4 183.4L571.1 190.8L567.2 191.9L570.3 193.9L568.7 205.7L571.7 213.1L568.3 212.5L565.9 222.9L568.1 224.6L565.2 230.8L557.3 233.3L556.2 230.3L553.6 233.8L550.4 234.4L547.3 239.0L550.1 240.6L547.4 244.5L547.2 249.9L554.3 251.9L552.3 254.3L547.4 256.3L543.0 260.2L541.7 259.1L541.6 262.1L539.3 264.2L535.1 263.4L533.8 270.4L534.9 274.5L538.3 273.7L536.8 278.2L538.5 278.9L534.2 281.4L531.2 281.5L530.1 283.5L531.1 287.9L527.0 293.8L524.5 299.9L517.1 296.5L509.0 301.1L506.9 298.7L491.6 302.7L492.3 305.9L483.0 309.7L481.3 305.8L475.1 306.4L471.4 302.7L463.1 302.1L461.6 299.9L454.8 301.0L460.2 295.2L451.7 293.3L449.4 295.2L434.2 293.4L422.4 299.8L419.9 313.1L410.1 313.9L406.0 319.2L398.5 317.5L393.1 320.7L390.9 317.3L379.2 315.4L365.8 318.0L361.9 321.7L351.7 324.8L345.0 322.4L343.5 319.1L338.7 318.9L334.8 310.7L329.5 309.7L329.3 307.6L325.7 305.8L324.5 301.4L319.6 300.2L319.7 297.8L318.0 298.3L311.8 291.8L312.8 284.8L308.2 283.9L306.0 278.7L306.9 276.6L310.0 276.1Z","PNG":"M19.1 111.3L21.3 108.3L20.7 107.8L21.5 105.5L19.8 101.6L20.8 100.6L19.7 97.6L20.0 96.5L17.8 94.6L16.8 92.3L18.1 89.2L17.8 84.0L16.7 81.1L15.2 79.9L17.3 80.4L17.5 79.5L20.3 80.7L28.3 81.4L28.0 95.4L29.8 110.1L28.7 110.5L25.9 109.4L25.9 111.1ZM9.5 86.7L13.3 88.1L13.7 90.2L15.7 91.0L13.8 93.5L11.3 102.2L7.8 100.1L5.3 100.6L4.5 101.7L4.0 100.5L4.5 98.9L5.3 98.7L4.5 94.0L5.3 90.8L4.0 89.9L4.3 87.9L3.7 87.3L4.7 86.9L5.7 88.1L6.8 88.1Z","JHR":"M244.2 283.2L246.0 282.7L250.1 285.0L251.9 284.7L252.3 283.8L253.1 284.1L252.5 285.5L256.2 288.6L257.2 288.6L256.6 289.3L257.4 292.5L258.6 293.8L256.7 294.7L258.1 298.6L259.2 299.0L263.7 305.0L265.1 305.4L266.4 307.3L265.9 308.1L268.3 311.5L266.7 311.7L266.6 314.7L269.7 318.4L273.5 326.0L277.2 331.0L278.5 334.3L277.5 333.4L276.7 333.7L277.3 334.1L276.8 337.2L278.6 339.8L279.5 340.0L279.9 339.0L280.6 339.7L280.3 340.9L284.8 349.1L284.2 350.3L286.7 353.4L286.5 354.9L287.8 356.2L286.9 357.3L287.0 359.3L289.2 362.8L288.2 364.7L290.0 368.4L288.7 368.4L288.7 373.3L287.1 373.6L286.4 372.8L283.5 375.3L282.2 374.3L279.0 374.9L278.5 374.0L275.8 373.0L278.0 369.8L276.8 370.5L274.6 368.0L272.3 367.5L273.3 367.1L272.2 366.4L273.6 364.7L273.4 363.6L275.5 363.0L275.3 362.3L273.1 362.6L272.4 364.3L271.4 361.4L271.8 360.0L268.0 355.6L267.8 354.4L266.8 356.1L267.4 357.9L269.3 359.0L270.5 362.1L269.5 362.9L270.2 365.8L269.1 368.2L266.6 369.0L261.9 368.3L260.1 365.9L256.9 364.9L255.6 364.9L255.3 363.8L254.8 365.5L252.6 367.1L249.4 365.2L249.7 366.3L246.8 368.1L244.4 372.5L241.9 374.5L238.0 373.7L237.3 369.7L237.1 374.1L238.0 375.7L235.8 377.1L235.5 380.5L232.8 377.4L230.7 376.3L228.5 368.7L224.9 361.2L219.1 357.3L210.3 353.9L202.5 348.3L198.5 346.8L195.9 347.1L192.1 343.5L192.7 341.5L184.1 338.3L181.4 338.2L179.8 339.2L178.1 337.9L174.3 332.4L168.5 327.1L168.9 325.7L169.8 325.9L169.3 325.1L167.8 324.8L164.5 322.1L164.6 320.6L167.2 320.7L167.8 319.2L167.1 317.4L165.7 317.4L163.0 315.2L165.0 313.4L164.7 311.1L166.3 306.1L166.2 304.2L167.7 303.2L168.0 301.9L171.9 300.5L171.9 297.3L173.3 296.4L172.6 294.0L173.6 292.8L172.8 289.8L175.0 286.7L174.0 285.1L179.3 271.1L186.0 273.2L198.0 287.8L210.5 293.0L224.6 288.0L242.2 297.0L244.5 295.3L241.3 291.7Z","KTN":"M136.9 33.9L142.0 36.7L147.4 35.7L150.3 37.5L153.5 38.2L155.9 40.9L164.0 57.8L167.7 61.3L160.5 68.3L158.2 71.7L156.9 72.0L158.9 82.3L157.0 83.9L158.5 89.5L157.4 90.4L157.3 91.7L161.1 94.4L159.9 98.2L159.2 107.7L162.5 108.5L164.2 110.6L167.2 112.6L165.2 115.2L166.5 118.7L165.2 120.8L166.8 123.0L166.0 123.7L166.7 124.2L165.8 127.0L167.4 127.5L168.0 126.7L175.7 130.8L175.2 132.9L177.0 135.6L176.2 136.8L173.0 135.5L172.3 136.5L172.6 141.9L170.5 141.6L168.7 140.3L167.1 142.7L165.5 143.1L161.8 140.3L155.7 140.4L156.5 142.0L153.5 145.5L149.5 143.8L146.6 144.6L146.6 146.1L142.7 143.8L142.6 142.5L139.2 139.8L138.9 136.9L133.8 138.9L131.8 138.6L130.8 136.9L129.5 136.8L129.5 138.2L128.1 136.7L126.9 137.0L126.6 144.0L125.5 144.2L124.6 147.5L123.6 147.4L122.8 145.1L123.3 143.8L122.4 142.6L120.2 142.0L119.4 139.6L118.1 139.8L118.1 137.1L116.6 136.7L115.3 137.1L114.2 146.5L113.1 147.3L111.8 146.5L111.3 147.3L107.5 148.6L107.4 150.0L104.3 151.8L103.8 150.7L101.9 151.2L100.4 149.5L99.4 149.7L97.1 147.2L94.5 148.1L94.0 149.9L92.2 149.8L91.6 148.5L89.3 146.7L86.9 147.1L87.3 145.7L84.2 142.2L84.7 140.3L87.9 140.3L87.2 137.0L88.7 136.1L90.0 133.6L88.9 131.8L89.5 130.5L91.9 129.9L92.1 126.2L90.4 121.7L92.2 120.3L94.4 114.0L94.9 108.3L97.4 101.8L100.6 100.0L101.4 97.4L104.0 95.8L107.6 97.4L112.2 95.7L113.3 94.0L112.5 92.9L112.2 88.6L113.2 87.3L112.7 84.9L106.7 83.9L108.8 79.1L106.7 77.8L106.9 73.9L109.4 71.1L109.1 67.6L111.0 67.1L111.2 65.5L112.6 65.6L113.8 64.6L115.1 65.5L114.8 66.5L118.6 69.1L118.0 67.4L119.2 65.3L121.1 65.1L121.0 64.3L122.2 63.7L122.1 62.2L123.5 61.3L124.5 61.6L126.7 59.6L125.9 56.9L125.1 56.9L125.9 54.1L126.8 53.7L126.3 52.5L128.7 49.9L128.9 48.5L134.3 44.9L137.1 40.2L136.2 38.5Z","MLK":"M164.5 322.1L158.6 319.8L156.8 319.8L144.2 314.1L141.2 314.0L139.8 311.3L135.9 308.3L134.3 305.2L131.3 303.4L128.9 303.2L128.3 302.1L131.4 300.5L132.6 298.4L133.7 299.8L134.9 298.8L135.0 297.1L136.8 297.9L139.0 296.8L140.4 297.2L142.8 294.3L145.6 296.1L149.8 297.1L155.9 294.6L160.5 296.2L160.4 296.9L171.9 300.5L168.0 301.9L167.7 303.2L166.2 304.2L166.3 306.1L164.7 311.1L165.0 313.4L163.0 315.2L164.2 316.6L164.7 316.2L165.7 317.4L167.4 317.7L167.8 319.9L167.2 320.7L164.6 320.6Z","NSN":"M128.8 301.9L125.9 299.5L121.3 299.9L120.3 301.0L120.5 296.2L118.1 292.8L116.0 292.8L116.3 289.0L114.3 287.2L110.7 287.6L109.8 287.0L110.5 286.0L111.8 286.0L111.4 284.8L112.9 283.5L112.5 282.3L114.0 279.8L113.2 268.4L122.5 268.6L125.8 259.6L127.5 257.6L128.5 257.6L127.0 251.6L128.1 249.8L126.5 246.6L126.9 245.1L125.4 241.4L124.6 241.2L126.0 239.2L128.8 240.6L128.6 242.4L133.5 243.5L134.8 247.8L138.3 245.8L140.8 245.7L141.8 247.0L157.8 251.2L163.0 258.1L176.7 267.1L177.8 266.4L179.3 271.1L174.0 285.1L175.0 286.7L172.8 289.8L173.6 292.8L172.6 294.0L173.3 296.4L171.9 297.3L171.9 300.5L160.4 296.9L160.5 296.2L155.9 294.6L149.8 297.1L145.6 296.1L142.8 294.3L140.4 297.2L139.0 296.8L136.8 297.9L135.0 297.1L134.2 299.6L133.0 299.5L132.6 298.4L131.4 300.5Z","PHG":"M229.2 177.6L227.9 180.7L226.8 181.4L230.4 192.5L228.1 192.0L225.4 195.4L226.5 203.8L223.8 203.2L222.7 208.8L233.1 223.9L228.6 234.9L231.2 245.6L230.0 263.7L232.8 271.6L244.2 283.2L241.3 291.7L244.5 295.3L242.2 297.0L224.6 288.0L210.5 293.0L198.0 287.8L186.0 273.2L179.3 271.1L177.8 266.4L176.7 267.1L163.0 258.1L157.8 251.2L141.8 247.0L140.8 245.7L138.3 245.8L134.8 247.8L133.5 243.5L128.6 242.4L128.8 240.6L126.0 239.2L124.6 241.2L122.9 241.3L117.8 238.3L116.6 236.2L115.4 235.8L115.4 234.5L113.9 233.4L114.0 231.4L116.1 229.8L114.0 224.5L115.7 221.4L117.1 221.1L117.6 217.4L115.6 215.2L114.2 212.0L112.4 210.8L112.4 209.7L109.1 210.1L106.5 208.8L102.5 203.6L102.0 201.0L103.1 198.6L101.1 196.0L100.8 189.9L99.7 188.2L101.3 185.2L101.1 183.0L96.9 181.5L95.5 178.5L96.6 175.6L92.7 174.4L92.5 172.8L93.4 171.9L92.3 170.6L91.8 166.6L90.1 165.7L91.1 165.2L91.6 162.7L88.4 161.3L85.8 161.9L85.5 159.9L83.9 159.2L86.0 157.9L86.2 155.4L87.9 154.5L87.5 153.3L86.3 152.9L85.4 148.7L86.9 147.1L89.3 146.7L91.6 148.5L92.2 149.8L94.0 149.9L94.5 148.1L97.1 147.2L99.4 149.7L100.4 149.5L101.9 151.2L103.8 150.7L104.3 151.8L107.4 150.0L107.5 148.6L111.3 147.3L111.8 146.5L113.1 147.3L114.2 146.5L115.3 137.1L116.6 136.7L118.1 137.1L118.1 139.8L119.4 139.6L120.2 142.0L122.4 142.6L123.3 143.8L122.8 145.1L123.6 147.4L124.6 147.5L125.5 144.2L126.6 144.0L126.9 137.0L128.1 136.7L129.5 138.2L129.5 136.8L130.8 136.9L131.8 138.6L133.8 138.9L138.9 136.9L139.2 139.8L142.6 142.5L142.7 143.8L146.6 146.1L146.6 144.6L149.5 143.8L153.5 145.5L156.5 142.0L155.7 140.4L161.8 140.3L165.5 143.1L167.1 142.7L168.7 140.3L170.5 141.6L172.6 141.9L172.3 136.5L173.0 135.5L176.6 137.0L178.5 140.2L184.7 143.0L189.4 142.6L192.0 147.3L191.1 150.5L189.2 149.8L189.7 155.3L191.7 157.2L198.3 157.3L200.3 159.1L200.8 161.3L201.7 161.4L200.2 163.1L201.1 167.2L198.5 166.4L196.9 169.8L195.1 169.9L195.4 172.7L193.9 175.0L194.7 179.0L192.1 180.3L195.1 183.0L200.3 180.9L204.9 181.8L205.5 183.4L208.4 184.1L211.7 187.5L214.4 187.3L214.4 188.9L216.6 188.7L219.3 192.1L218.8 193.4L221.5 198.1L221.2 195.4L222.7 194.7L223.1 193.6L222.7 186.8L220.7 183.9L221.3 183.7L221.3 181.6L222.5 181.1L223.0 179.9L222.2 176.4L223.9 177.5Z","PRK":"M48.3 200.2L44.5 200.8L40.4 197.6L40.2 189.4L44.1 190.2L45.2 184.0L39.1 177.8L34.6 178.3L31.1 167.7L31.9 159.9L34.0 160.1L34.8 150.9L31.5 149.8L33.3 144.7L36.3 143.4L32.7 143.0L31.6 136.8L34.3 135.2L30.9 135.0L29.5 128.7L27.4 130.0L24.6 128.6L25.2 126.5L26.2 125.9L24.5 125.1L22.0 126.3L20.6 120.2L18.2 117.2L16.7 113.9L17.0 113.0L19.1 111.3L25.9 111.1L27.7 111.9L27.1 113.3L29.9 114.4L32.1 113.4L34.0 111.2L35.0 108.5L37.3 107.7L39.4 103.2L41.7 101.8L43.0 98.0L48.3 98.0L51.0 96.3L51.6 87.0L56.2 85.5L57.5 79.9L55.2 78.0L59.0 74.8L59.6 70.4L57.3 66.6L60.3 65.7L63.2 68.8L65.1 68.3L66.9 70.0L70.8 77.4L76.4 73.3L79.4 70.0L78.3 67.3L80.5 63.4L85.2 63.8L88.5 59.4L94.8 59.4L101.7 54.9L104.8 59.2L107.0 59.6L106.9 63.6L109.1 67.6L109.4 71.1L106.9 73.9L106.7 77.8L108.8 79.1L106.7 83.9L112.7 84.9L113.2 87.3L112.2 88.6L112.5 92.9L113.3 94.0L112.2 95.7L107.6 97.4L104.0 95.8L101.4 97.4L100.6 100.0L97.4 101.8L94.9 108.3L94.4 114.0L92.2 120.3L90.4 121.7L92.1 126.2L91.9 129.9L89.5 130.5L88.9 131.8L90.0 133.6L88.7 136.1L87.2 137.0L87.9 140.3L84.7 140.3L84.2 142.2L87.3 145.7L85.4 148.7L86.3 152.9L87.5 153.3L87.9 154.5L86.2 155.4L86.0 157.9L83.9 159.2L85.5 159.9L85.8 161.9L88.4 161.3L91.6 162.7L91.1 165.2L90.1 165.7L91.8 166.6L92.3 170.6L93.4 171.9L92.5 172.8L92.7 174.4L96.6 175.6L95.5 178.5L96.9 181.5L101.1 183.0L101.3 185.2L99.7 188.2L100.8 189.9L101.1 196.0L103.1 198.6L102.0 201.0L102.5 203.6L104.6 205.7L103.1 205.4L99.9 210.5L97.5 211.6L94.0 210.0L92.0 207.3L88.1 205.5L87.2 203.7L83.6 204.6L83.8 207.0L85.2 209.9L84.7 211.3L80.5 212.9L78.2 212.3L78.3 209.4L75.9 209.9L70.7 208.2L66.2 208.3L67.4 205.0L65.1 207.0L65.1 203.9L63.5 204.5L63.0 203.5L60.4 203.7L59.8 206.0L58.0 204.1L59.5 203.1L59.5 202.0L56.8 201.5L57.4 198.8Z","TRG":"M167.7 61.3L172.3 64.0L177.8 70.8L188.5 79.4L194.2 82.9L196.4 82.8L198.7 84.1L206.9 91.7L209.4 95.6L207.8 97.4L210.1 96.5L213.2 101.5L212.4 102.0L230.6 135.4L227.1 135.7L229.4 135.6L229.2 136.6L230.9 140.5L231.3 144.2L230.0 144.2L233.1 153.1L231.4 153.9L230.8 156.9L231.5 162.4L234.3 167.2L232.9 169.9L232.9 171.9L232.1 171.9L231.8 173.2L230.9 172.8L230.5 177.8L223.9 177.5L222.2 176.4L223.0 179.9L222.5 181.1L221.3 181.6L221.3 183.7L220.7 183.9L222.7 186.8L223.1 193.6L222.7 194.7L221.2 195.4L221.5 198.1L218.8 193.4L219.3 192.1L216.6 188.7L214.4 188.9L214.4 187.3L211.7 187.5L208.4 184.1L205.5 183.4L204.9 181.8L200.3 180.9L195.1 183.0L192.1 180.3L194.7 179.0L193.9 175.0L195.4 172.7L195.1 169.9L196.9 169.8L198.5 166.4L201.1 167.2L200.2 163.1L201.7 161.4L200.8 161.3L200.3 159.1L198.3 157.3L191.7 157.2L189.7 155.3L189.2 149.8L191.1 150.5L192.0 147.3L189.4 142.6L184.7 143.0L178.5 140.2L176.2 136.8L177.0 135.6L175.2 132.9L175.7 130.8L168.0 126.7L167.4 127.5L165.8 127.0L166.7 124.2L166.0 123.7L166.8 123.0L165.2 120.8L166.5 118.7L165.2 115.2L167.2 112.6L164.2 110.6L162.5 108.5L159.2 107.7L159.9 98.2L161.1 94.4L157.3 91.7L157.4 90.4L158.5 89.5L157.0 83.9L158.9 82.3L156.9 72.0L158.2 71.7L160.5 68.3Z"},"l":{"KUL":{"c":[109.3,249.9],"a":93},"KDH":{"c":[38.5,60.0],"a":3561},"SBH":{"c":[630.4,132.4],"a":11331},"SEL":{"c":[96.1,234.2],"a":3183},"SWK":{"c":[474.8,243.0],"a":19085},"PNG":{"c":[20.9,96.9],"a":289},"JHR":{"c":[234.5,336.7],"a":7445},"KTN":{"c":[135.0,106.6],"a":5928},"MLK":{"c":[151.9,308.7],"a":655},"NSN":{"c":[136.3,285.9],"a":2623},"PHG":{"c":[152.6,184.8],"a":14126},"PRK":{"c":[71.5,138.3],"a":8231},"TRG":{"c":[193.0,132.7],"a":5080}}};
+const GEOM=[['n','NTT count'],['p','% over 24 h'],['t','Median MTTR'],['o','Open']];
+let MAPM='n',GCACHE=null;
+function geoIdx(){
+  if(GCACHE&&GCACHE.D===D)return GCACHE;
+  const gi=D.state.map(()=>-1),mem=GEO.map(()=>[]);
+  D.state.forEach((nm,i)=>{const u=nm.toUpperCase().trim();const g=GEO.findIndex(x=>x.m.includes(u));if(g>=0){gi[i]=g;mem[g].push(i)}});
+  const open=D.status.findIndex(x=>x.toLowerCase()==='open');
+  return GCACHE={D,gi,mem,open};
+}
+function statsOf(rows,open){
+  let n=0,over=0,known=0,op=0;const mins=[],cc=new Map(),sc=new Map(),rg=new Map();
+  for(const r of rows){n++;cc.set(r[3],(cc.get(r[3])||0)+1);sc.set(r[4],(sc.get(r[4])||0)+1);rg.set(r[2],(rg.get(r[2])||0)+1);
+    if(r[7]>=0){known++;if(r[7]===1)over++}
+    if(typeof r[8]==='number'&&r[8]>=0)mins.push(r[8]);
+    if(r[6]===open)op++}
+  mins.sort((a,b)=>a-b);
+  return{n,over,known,op,med:mins.length?mins[mins.length>>1]:null,cc,sc,rg};
+}
+const shortCause=n=>n.replace('Equipment Hardware','Eqpt HW').replace('Equipment Software','Eqpt SW').replace('3rd Party Fiber Cable','3rd-party fiber').replace('Fiber Cut','Cut').replace('Fiber Quality','Quality').replace('Trunk/Junction','trunk').replace(/^Equipment /,'Eqpt ');
+const real=n=>n!=='—'&&n!=='-';
+const topOf=(m,d)=>{let b=null;for(const [i,v] of m){if(!real(d[i]))continue;if(!b||v>b.v)b={i,v,n:d[i]}}return b};
+function mval(s){
+  if(!s.n)return{x:0,t:'–'};
+  if(MAPM==='n')return{x:s.n,t:fmt(s.n)};
+  if(MAPM==='p'){const p=s.known?s.over/s.known:0;return{x:p,t:s.known?pc(p,0):'–'}}
+  if(MAPM==='t')return{x:s.med||0,t:s.med==null?'–':(s.med/60).toFixed(1)+' h'};
+  return{x:s.op,t:fmt(s.op)};
+}
+function renderGeo(){
+  const {gi,mem,open}=geoIdx();
+  const by=GEO.map(()=>[]);let unmapped=0;
+  for(const r of D.rows){if(!pass(r,'state'))continue;const g=gi[r[2]];g>=0?by[g].push(r):unmapped++}
+  const st=by.map(rs=>statsOf(rs,open));
+  const vals=st.map(mval),mx=Math.max(1e-9,...vals.map(v=>v.x));
+  const selG=GEO.map((_,g)=>mem[g].length>0&&mem[g].every(i=>F.state.has(i)));
+  const anySel=selG.some(Boolean);
+  $('#geo-mm').innerHTML=GEOM.map(([k,l])=>`<button type="button" data-mm="${k}" aria-pressed="${MAPM===k}">${l}</button>`).join('');
+  const sh=GEOSHAPE,pos=i=>{const s=st[i],v=vals[i],zero=!s.n,pctv=zero?0:Math.round(12+88*v.x/mx);return{zero,pctv,hi:!zero&&pctv>55}};
+  const tipOf=i=>{const g=GEO[i],s=st[i],tc=topOf(s.cc,D.cause);return esc(T(g.n,[['NTT',s.n],['Over 24 h',s.known?pc(s.over/s.known,0):'–'],['Median MTTR',s.med==null?'–':(s.med/60).toFixed(1)+' h'],['Open',s.op],['Top cause',tc?esc(tc.n):'–']]))};
+  const fillOf=p=>p.zero?'':`style="fill:color-mix(in srgb,var(--mark) ${p.pctv}%,var(--surface))"`;
+  const cls=(i,p)=>`msh${p.zero?' zero':''}${selG[i]?' sel':''}${anySel&&!selG[i]?' dim':''}`;
+  const draw=i=>{const d=sh.p[GEO[i].id];if(!d)return '';const p=pos(i);return `<path class="${cls(i,p)}" data-g="${i}" data-tip="${tipOf(i)}" ${fillOf(p)} d="${d}"/>`};
+  const order=GEO.map((_,i)=>i).filter(i=>GEO[i].id!=='KUL').sort((a,b)=>(selG[a]?1:0)-(selG[b]?1:0));
+  const lbl=GEO.map((g,i)=>{const l=sh.l[g.id];if(!l||l.a<5000)return '';const p=pos(i);
+    return `<text class="mlb${p.hi?' hi':''}" x="${l.c[0]}" y="${l.c[1]-3}">${esc(g.n)}</text><text class="mlb v${p.hi?' hi':''}" x="${l.c[0]}" y="${l.c[1]+11}">${vals[i].t}</text>`}).join('');
+  const kul=sh.l.KUL,ki=GEO.findIndex(g=>g.id==='KUL'),kp=pos(ki);
+  const marker=kul?`<circle class="${cls(ki,kp)}" data-g="${ki}" data-tip="${tipOf(ki)}" cx="${kul.c[0]}" cy="${kul.c[1]}" r="6" ${fillOf(kp)}/>`:'';
+  const chips=GEO.map((g,i)=>({g,i,v:vals[i],p:pos(i)})).sort((a,b)=>b.v.x-a.v.x).map(({g,i,v,p})=>`<button type="button" data-g="${i}" aria-pressed="${selG[i]}" class="${anySel&&!selG[i]?'dim':''}" data-tip="${tipOf(i)}"><i style="background:${p.zero?'var(--track)':`color-mix(in srgb,var(--mark) ${p.pctv}%,var(--surface))`}"></i>${esc(g.n)} <b class="num">${v.t}</b></button>`).join('');
+  $('#geo-tiles').innerHTML=`<svg viewBox="0 0 ${sh.w} ${sh.h}" role="img" aria-label="Map of Malaysia coloured by ${GEOM.find(x=>x[0]===MAPM)[1]}">${order.map(draw).join('')}${marker}${lbl}<text class="msea" x="${sh.pw/2}" y="${sh.h-2}">Peninsular</text><text class="msea" x="${(sh.pw+sh.w)/2}" y="${sh.h-2}">Sabah &amp; Sarawak · moved west, not to scale</text></svg><div class="mch">${chips}</div>`;
+  $('#geo-leg').innerHTML=`<span>Low</span><i></i><span>High</span><span style="margin-left:auto">${unmapped?fmt(unmapped)+' NTT with no state are not on the map':''}</span>`;
+
+  /* root-cause panel for current scope */
+  const nat=statsOf(D.rows.filter(r=>pass(r,'state')),open);
+  const sel=GEO.map((g,i)=>i).filter(i=>selG[i]);
+  const rows=D.rows.filter(r=>pass(r));
+  const s=statsOf(rows,open);
+  const title=sel.length?(sel.length<=2?sel.map(i=>GEO[i].n).join(' + '):GEO[sel[0]].n+' + '+(sel.length-1)+' more'):'All Malaysia';
+  if(!s.n){$('#geo-why').innerHTML=`<h4>${esc(title)}</h4><p class="empty">No NTT for the current filters.</p>`;return}
+  const p24=s.known?s.over/s.known:null,n24=nat.known?nat.over/nat.known:null;
+  const tc=topOf(s.cc,D.cause),ts=topOf(s.sc,D.sub);
+  const fib=[...s.cc].reduce((a,[i,v])=>a+(isFib[i]?v:0),0);
+  let ins=`<b>${esc(title)}:</b> ${tc?`<b>${esc(tc.n)}</b> is the biggest cause (${pc(tc.v/s.n,0)} of NTT)`:'no cause recorded yet'}${fib/s.n>=0.4?`; fiber-related faults total ${pc(fib/s.n,0)}`:''}.`;
+  if(ts)ins+=` Top sub cause: <b>${esc(ts.n)}</b> (${pc(ts.v/s.n,0)}).`;
+  if(p24!==null){
+    if(sel.length&&n24!==null){const d=Math.round((p24-n24)*100);ins+=` ${pc(p24,0)} take over 24 h to restore${Math.abs(d)>=3?` — ${Math.abs(d)} pts ${d>0?'slower':'faster'} than the national ${pc(n24,0)}`:' — in line with national'}.`}
+    else ins+=` ${pc(p24,0)} take over 24 h to restore.`;
+  }
+  if(!sel.length){const tg=st.map((x,i)=>({i,n:x.n})).sort((a,b)=>b.n-a.n)[0];if(tg&&tg.n)ins+=` <b>${GEO[tg.i].n}</b> alone is ${pc(tg.n/Math.max(1,nat.n),0)} of NTT.`}
+  const list=(m,k,lim)=>{const items=[...m].map(([i,v])=>({i,v,n:D[k][i]})).sort((a,b)=>b.v-a.v).slice(0,lim);const mx=Math.max(1,...items.map(x=>x.v)),on=F[k].size>0;
+    return items.map(x=>`<button class="brow${on&&!F[k].has(x.i)?' dim':''}" data-k="${k}" data-i="${x.i}" data-tip="${esc(T(x.n,[['NTT',x.v],['Share',pc(x.v/s.n)]]))}"><span class="l" title="${esc(x.n)}">${esc(real(x.n)?x.n:'(blank)')}</span><span class="bar"><i style="width:${x.v/mx*100}%"></i></span><span class="n num">${x.v}</span></button>`).join('')};
+  let rg='';
+  if(sel.length===1&&mem[sel[0]].length>1)rg=`<div class="rg">Regions: ${[...s.rg].sort((a,b)=>b[1]-a[1]).map(([i,v])=>`${esc(D.state[i])} <b>${v}</b>`).join(' · ')}</div>`;
+  $('#geo-why').innerHTML=`<h4>${esc(title)}</h4>
+    <div class="st"><div><b class="num">${fmt(s.n)}</b><span>NTT</span></div><div><b class="num">${p24===null?'–':pc(p24,0)}</b><span>over 24 h</span></div><div><b class="num">${s.med==null?'–':(s.med/60).toFixed(1)+' h'}</b><span>median MTTR</span></div><div><b class="num">${fmt(s.op)}</b><span>still open</span></div></div>
+    <p class="ins">${ins}</p>
+    <h5>Root cause category</h5>${list(s.cc,'cause',6)}
+    <h5>Sub cause</h5>${list(s.sc,'sub',5)}${rg}`;
+}
+$('#c-geo').addEventListener('click',e=>{
+  const m=e.target.closest('[data-mm]');if(m){MAPM=m.dataset.mm;renderGeo();return}
+  const t=e.target.closest('[data-g]');if(!t)return;
+  const mem=geoIdx().mem[+t.dataset.g];if(!mem.length)return;
+  const on=mem.every(i=>F.state.has(i));
+  mem.forEach(i=>on?F.state.delete(i):F.state.add(i));render();
+});
+
+/* ---------- heatmap, needs-attention, avoidability ---------- */
+/* Sub-cause classes are a judgement call: edit the patterns to match TNOC's own definitions. */
+const CLS=[
+ {k:'av',n:'Third-party & human (avoidable)',col:'var(--mark2)',re:/rodent|animal|theft|vandal|working party|contractor|accident|3rd party|fibercomm|misconfig|pmw|rfc|configuration lost|end to end test/i},
+ {k:'eq',n:'Plant & equipment fault',col:'var(--mark)',re:/core |card|patch ?cord|port|odu|idu|hang|interface|power drop|controller|cable|transceiver|feeder|surge|disc |fiberail|trib|nmu|poe|internal|switch|synchroni|power related|hitemperature/i},
+ {k:'nt',n:'Natural / disaster',col:'var(--warn)',re:/disaster|flood|landslide|tree|fire/i},
+ {k:'un',n:'Unknown / other',col:'var(--muted)',re:/./}
+];
+let SCACHE=null;
+const subCls=()=>{if(SCACHE&&SCACHE.D===D)return SCACHE.v;const v=D.sub.map(n=>{if(CLS[2].re.test(n))return 2;if(CLS[0].re.test(n))return 0;if(CLS[1].re.test(n))return 1;return 3});SCACHE={D,v};return v};
+function drill(g,c){
+  const {mem}=geoIdx();F.state.clear();F.cause.clear();
+  mem[g].forEach(i=>F.state.add(i));if(c!=null&&c>=0)F.cause.add(c);render();
+}
+function renderInsights(){
+  const {gi,mem,open}=geoIdx();
+  /* heatmap */
+  const cell=GEO.map(()=>new Map()),tot=GEO.map(()=>0),ct=new Map();
+  for(const r of D.rows){if(!pass(r,'state'))continue;const g=gi[r[2]];if(g<0)continue;cell[g].set(r[3],(cell[g].get(r[3])||0)+1);tot[g]++;ct.set(r[3],(ct.get(r[3])||0)+1)}
+  const cols=[...ct].filter(([i])=>real(D.cause[i])).sort((a,b)=>b[1]-a[1]).slice(0,8).map(x=>x[0]);
+  const order=GEO.map((_,i)=>i).filter(i=>tot[i]).sort((a,b)=>tot[b]-tot[a]);
+  let mx=1;order.forEach(g=>cols.forEach(c=>{mx=Math.max(mx,cell[g].get(c)||0)}));
+  const csel=F.cause.size>0,selS=g=>mem[g].length>0&&mem[g].every(i=>F.state.has(i));
+  $('#v-hm').innerHTML=order.length?`<table class="hm"><thead><tr><th class="rh"></th>${cols.map(c=>`<th class="${csel&&!F.cause.has(c)?'cd':''}" title="${esc(D.cause[c])}">${esc(shortCause(D.cause[c]))}</th>`).join('')}<th>All</th></tr></thead><tbody>${order.map(g=>`<tr><th class="rh">${esc(GEO[g].n)}</th>${cols.map(c=>{const v=cell[g].get(c)||0,pp=Math.round(12+88*v/mx);
+    const dim=(csel&&!F.cause.has(c))||(F.state.size&&!selS(g));
+    return v?`<td class="${pp>55?'hi':''}${dim?' dim':''}" data-hg="${g}" data-hc="${c}" style="background:color-mix(in srgb,var(--mark) ${pp}%,var(--surface))" data-tip="${esc(T(GEO[g].n+' · '+D.cause[c],[['NTT',v],['Share of state',pc(v/tot[g],0)]]))}">${v}</td>`:`<td class="z">·</td>`}).join('')}<td class="tot">${tot[g]}</td></tr>`).join('')}</tbody></table>`:'<p class="empty">No NTT for the current filters.</p>';
+
+  /* needs attention: biggest rise vs previous month */
+  let mc=F.m!==null?F.m:HAS.lastIndexOf(true);
+  const pm=mc>0&&HAS[mc-1]?mc-1:-1;
+  const hot=$('#v-hot');
+  if(mc<0||pm<0){$('#hotN').textContent='';hot.innerHTML='<p class="empty">Needs two consecutive months of data to compare.</p>'}
+  else{
+    $('#hotN').textContent=MN[mc]+' vs '+MN[pm];
+    const cur=new Map(),prv=new Map(),ov=new Map(),gs=GEO.map(()=>({n:0,o:0,k:0}));
+    for(const r of D.rows){if(!pass(r,'m')||(r[0]!==mc&&r[0]!==pm))continue;const g=gi[r[2]];if(g<0)continue;
+      const key=g+'|'+r[3];
+      if(r[0]===mc){cur.set(key,(cur.get(key)||0)+1);const q=gs[g];if(r[7]>=0){q.k++;if(r[7]===1)q.o++}q.n++;
+        if(r[7]>=0){const a=ov.get(key)||[0,0];a[1]++;if(r[7]===1)a[0]++;ov.set(key,a)}}
+      else prv.set(key,(prv.get(key)||0)+1)}
+    const rise=[...cur].map(([k,v])=>({k,v,p:prv.get(k)||0,d:v-(prv.get(k)||0)})).filter(x=>x.d>=2&&real(D.cause[+x.k.split('|')[1]])).sort((a,b)=>b.d-a.d||b.v-a.v).slice(0,5);
+    const slow=gs.map((q,g)=>({g,...q,p:q.k?q.o/q.k:0})).filter(q=>q.k>=10).sort((a,b)=>b.p-a.p).slice(0,3);
+    hot.innerHTML=(rise.length?rise.map(x=>{const [g,c]=x.k.split('|').map(Number),o=ov.get(x.k),pp=o&&o[1]?Math.round(o[0]/o[1]*100)+'% over 24 h':'';
+      return `<button class="hot" data-hg="${g}" data-hc="${c}"><b>${esc(GEO[g].n)} · ${esc(shortCause(D.cause[c]))}</b><span class="d num">+${x.d}</span><span class="s">${x.p} → ${x.v} NTT${pp?' · '+pp:''}</span></button>`}).join(''):'<p class="empty">No cause rose by 2 or more NTT.</p>')
+    +(slow.length?`<div class="hd2">Slowest to restore</div>`+slow.map(x=>`<button class="hot" data-hg="${x.g}" data-hc="-1"><b>${esc(GEO[x.g].n)}</b><span class="d num">${Math.round(x.p*100)}%</span><span class="s">${x.o} of ${x.k} NTT took over 24 h in ${MN[mc]}</span></button>`).join(''):'');
+  }
+
+  /* avoidable vs equipment */
+  const sc=subCls(),nat=[0,0,0,0],per=GEO.map(()=>[0,0,0,0]);let nt=0;
+  for(const r of D.rows){if(!pass(r,'state'))continue;const g=gi[r[2]];if(g<0)continue;const c=sc[r[4]];nat[c]++;per[g][c]++;nt++}
+  const bar=a=>{const t=a.reduce((x,y)=>x+y,0)||1;return `<div class="stk">${a.map((v,i)=>v?`<i style="width:${v/t*100}%;background:${CLS[i].col}" data-tip="${esc(T(CLS[i].n,[['NTT',v],['Share',pc(v/t,0)]]))}"></i>`:'').join('')}</div>`};
+  $('#v-av').innerHTML=nt?`<div class="avl">${CLS.map((c,i)=>`<span><i style="background:${c.col}"></i>${c.n} <b>${pc(nat[i]/nt,0)}</b></span>`).join('')}</div>`
+    +order.slice(0,8).map(g=>`<div class="av"><span>${esc(GEO[g].n)}</span>${bar(per[g])}<span class="n num">${pc(per[g][0]/(tot[g]||1),0)}</span></div>`).join('')
+    +`<div class="rg" style="font-size:11px;color:var(--muted);margin-top:6px">Number on the right = avoidable share. Top 8 states by volume.</div>`:'<p class="empty">No NTT for the current filters.</p>';
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('[data-hg]');if(!t)return;
+  drill(+t.dataset.hg,+t.dataset.hc);
+  $('#c-geo').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
 /* ---------- render ---------- */
 function render(){
-  renderMonths();renderSlicers();renderKPIs();
+  renderMonths();renderSlicers();renderKPIs();renderGeo();renderInsights();
   const np=barList('pic','#v-pic',{}),ns=barList('state','#v-state',{});
   $('#picN').textContent=np+' people';$('#stN').textContent=ns+' states';
   renderDonut();renderTables();renderTrend();renderFR();
@@ -667,9 +924,9 @@ function showTip(e){const t=e.target.closest&&e.target.closest('[data-tip]');if(
   tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=Math.max(8,y)+'px'}
 document.addEventListener('pointermove',showTip);document.addEventListener('pointerdown',showTip);
 addEventListener('scroll',()=>tipEl.hidden=true,{passive:true});
-document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
-  document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
-  $('#v-dash').hidden=b.dataset.v!=='dash';$('#v-admin').hidden=b.dataset.v!=='admin';
+document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.tabs [role="tab"]').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
+  $('#v-dash').hidden=b.dataset.v!=='dash';$('#fctl').hidden=b.dataset.v!=='dash';syncSticky();$('#v-admin').hidden=b.dataset.v!=='admin';
 }));
 $('#theme').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=dark?'light':'dark'});
 /* ---------- data layer: original workbook + shared uploads ---------- */
