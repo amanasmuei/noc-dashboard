@@ -5,3 +5,4 @@ data
 *.html
 !index.html
 .DS_Store
+.env

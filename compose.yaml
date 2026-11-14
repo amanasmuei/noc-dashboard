@@ -6,4 +6,8 @@ services:
       - "${PORT:-8080}:8080"
     volumes:
       - ./data:/app/data
+    environment:
+      - DASH_PASS=${DASH_PASS:-}
+      - SUB_PASS=${SUB_PASS:-}
+      - ADMIN_PASS=${ADMIN_PASS:-}
     restart: unless-stopped

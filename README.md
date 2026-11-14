@@ -19,6 +19,33 @@ address reads and writes the same store, so an upload is the latest data for eve
 - **Reset to baked baseline:** stop the server, `rm -rf data/`, start again. First
   load seeds `data/ntt.json` from the dataset baked into `index.html`.
 
+## Who may publish (passcodes)
+
+By default anyone who can reach the port can publish. To split the teams, set passcodes
+(environment variables read by `serve.py`; with none set the store stays open):
+
+| Variable | Can publish |
+|---|---|
+| `DASH_PASS` | dashboard months and fault rate |
+| `SUB_PASS` | submarine data |
+| `ADMIN_PASS` | both (optional) |
+
+Everyone can still read the dashboards and preview a file. On the **Upload data** tab a
+"Publishing access" card asks for the passcode (kept for that browser tab only); the publish
+button stays disabled until the passcode matches the data in the file. The server enforces it
+too, so a wrong or missing passcode gets 401/403. Upload history records the role
+("Dashboard team", "Submarine team", "Admin"), so you can see which team published.
+
+```bash
+cp .env.example .env     # fill in the values; .env is git-ignored and never synced to the Pi
+python3 serve.py         # local: export the variables first, e.g. set -a; . ./.env; set +a
+docker compose up -d     # compose reads .env automatically
+```
+
+On the Pi, create `/home/aman/noc/.env` once (`make pi` leaves it alone) and run `make pi`.
+Passcodes are plain shared secrets over HTTP on the LAN: this separates teams, it is not
+strong security. A fresh, empty store may seed its baseline without a passcode.
+
 ## Open `index.html` directly (no server)
 
 Works, but the store falls back to `localStorage` of that one browser: uploads do not

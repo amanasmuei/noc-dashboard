@@ -589,6 +589,7 @@ button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;
       </div>
     </div>
     <div class="adm-col">
+      <div class="card" id="a-auth" hidden><div class="card-h"><h3>Publishing access</h3><span id="a-auth-st"></span></div><div class="card-b" id="a-auth-b"></div></div>
       <div class="card"><div class="card-h"><h3>Data on the dashboard</h3><span>2026</span></div><div class="card-b" id="a-months"></div></div>
       <div class="card" id="a-histc"><div class="card-h"><h3>Recent uploads</h3><span>Editors only</span></div><div class="card-b"><div class="hist" id="a-hist"><p class="empty">No uploads yet.</p></div></div></div>
     </div>
@@ -631,7 +632,8 @@ if(typeof window.claude==='undefined'){(function(){
       const had=path in cache, old=cache[path];
       del?delete cache[path]:cache[path]=data;
       try{
-        const r=await fetch('/api/doc',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({path,data,delete:!!del})});
+        const r=await fetch('/api/doc',{method:'POST',headers:{'content-type':'application/json','x-passcode':pass()},body:JSON.stringify({path,data,delete:!!del})});
+        if(r.status===401||r.status===403){const e=new Error('passcode');e.code='passcode';throw e}
         if(!r.ok)throw new Error('store '+r.status);
         st.lastWrite=Date.now();
       }catch(e){had?cache[path]=old:delete cache[path];throw e}
@@ -653,8 +655,15 @@ if(typeof window.claude==='undefined'){(function(){
     async get(){await remote();const o=map(c);return{exists:id in o,data:()=>o[id]}}
   }};
   const db={collection:col,doc};
-  const user={canEdit:async()=>true,can:async()=>true,id:async()=>'local',
-    profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:st.remote?'You':'You (this browser)'}]))};
+  /* write passcode (only when serve.py has DASH_PASS / SUB_PASS / ADMIN_PASS set); kept for this tab only */
+  const A=window.TNOCAUTH={required:false,scopes:[],role:null};
+  const pass=()=>{try{return sessionStorage.getItem('tnoc-pass')||''}catch(e){return ''}};
+  A.check=async()=>{try{const r=await fetch('/api/auth',{method:'POST',headers:{'x-passcode':pass()}});const v=await r.json();A.required=!!v.required;A.scopes=v.scopes||[];A.role=v.role||null}catch(e){}};
+  A.unlock=async p=>{try{sessionStorage.setItem('tnoc-pass',p)}catch(e){}await A.check();if(A.required&&!A.scopes.length){try{sessionStorage.removeItem('tnoc-pass')}catch(e){}return false}return true};
+  A.lock=async()=>{try{sessionStorage.removeItem('tnoc-pass')}catch(e){}await A.check()};
+  const WHO={dashboard:'Dashboard team',submarine:'Submarine team',both:'Admin'};
+  const user={canEdit:async()=>true,can:async()=>true,id:async()=>A.role||'local',
+    profiles:async ids=>Object.fromEntries(ids.map(i=>[i,{name:WHO[i]||(st.remote?'You':'You (this browser)')}]))};
   const downloads={async save({filename,data}){const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([data],{type:'text/csv'}));a.download=filename;document.body.appendChild(a);a.click();
     setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}};
@@ -1303,6 +1312,23 @@ function frUI(){
   const st=f.same?'<span class="bdg c-mute">No change</span>':'<span class="bdg c-warn">Changed</span>';
   return `<div class="frrow"><input type="checkbox" id="fr-inc" aria-label="Include fault rate" ${ADM.frInc?'checked':''}><div><b>Fault rate</b> from sheet “${esc(f.sheet)}” · ${esc(f.rows.map(r=>r.k).join(', '))} · ${mo.length?esc(mo[0]+'–'+mo[mo.length-1]):'no months'}</div>${st}</div>`;
 }
+const okFor=k=>!window.TNOCAUTH||!TNOCAUTH.required||TNOCAUTH.scopes.includes(k);
+function renderAuth(){
+  const el=$('#a-auth'),A=window.TNOCAUTH;if(!el)return;
+  if(!A||!A.required){el.hidden=true;return}
+  el.hidden=false;
+  const key=A.scopes.join();if(el.dataset.k===key)return;el.dataset.k=key;
+  const b=s=>`<span class="bdg ${A.scopes.includes(s)?'c-good':'c-mute'}">${A.scopes.includes(s)?'✓':'🔒'} ${s==='dashboard'?'Dashboard':'Submarine'}</span>`;
+  $('#a-auth-st').textContent=A.scopes.length?'Unlocked':'Locked';
+  $('#a-auth-b').innerHTML=(A.scopes.length?`<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${b('dashboard')}${b('submarine')}<button class="btn ghost sm" id="a-lock" type="button" style="margin-left:auto">Lock</button></div>`
+    :`<p class="hint" style="padding:0 0 8px">Enter your passcode to publish. Anyone can still read and preview files.</p><div style="display:flex;gap:8px"><input id="a-pass" type="password" autocomplete="off" aria-label="Passcode" placeholder="Passcode" style="flex:1;min-width:0;font:inherit;font-size:13px;padding:7px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink)"><button class="btn sm" id="a-unlock" type="button">Unlock</button></div><div id="a-auth-e" class="hint" style="color:var(--bad)" role="alert"></div>`);
+}
+async function afterAuth(){try{ADM.me=await ADM.user.id()}catch(e){}$('#a-auth').dataset.k='?';renderAdmin()}
+document.addEventListener('click',async e=>{
+  if(e.target.closest('#a-lock')){await TNOCAUTH.lock();afterAuth();return}
+  if(e.target.closest('#a-unlock')){const v=$('#a-pass').value;if(!v)return;const ok=await TNOCAUTH.unlock(v);if(ok)afterAuth();else{$('#a-auth-e').textContent='Wrong passcode.';$('#a-pass').select()}}
+});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='a-pass')$('#a-unlock').click()});
 function sbUI(){
   const f=ADM.sb;if(!f)return '';
   const st=f.same?'<span class="bdg c-mute">No change</span>':'<span class="bdg c-warn">Changed</span>';
@@ -1313,14 +1339,14 @@ function sbRow(){
   const L=SBLIVE;
   const tag=L?'<span class="bdg c-warn">Uploaded</span>':'<span class="bdg c-info">Original</span>';
   const det=L?`<b>${esc(L.source||'file')}</b> · ${esc(fmtAt(L.at))}<br>by ${esc(nameOf(L.by))}`:'From SubmarineNTT_v11.xlsx';
-  const act=L&&ADM.can?'<button class="btn ghost sm" data-rvsb="1" type="button">Revert</button>':'';
+  const act=L&&ADM.can&&okFor('submarine')?'<button class="btn ghost sm" data-rvsb="1" type="button">Revert</button>':'';
   return `<div class="mrow" style="grid-template-columns:minmax(0,1fr) auto;border-top:1.5px solid var(--line);margin-top:4px"><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Submarine</b>${tag}<span class="num" style="font-size:12.5px">${fmt(sbData().rows.length)} NTT</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
 }
 function frRow(){
   const L=FRLIVE;
   const tag=L?'<span class="bdg c-warn">Uploaded</span>':'<span class="bdg c-info">Original</span>';
   const det=L?`<b>${esc(L.source||'file')}</b> · ${esc(fmtAt(L.at))}<br>by ${esc(nameOf(L.by))}`:'From the original workbook';
-  const act=L&&ADM.can?'<button class="btn ghost sm" data-rvfr="1" type="button">Revert</button>':'';
+  const act=L&&ADM.can&&okFor('dashboard')?'<button class="btn ghost sm" data-rvfr="1" type="button">Revert</button>':'';
   return `<div class="mrow" style="grid-template-columns:minmax(0,1fr) auto;border-top:1.5px solid var(--line);margin-top:4px"><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Fault rate</b>${tag}</div><div class="d">${det}</div></div><div>${act}</div></div>`;
 }
 /* ---------- admin: parsing ---------- */
@@ -1434,6 +1460,7 @@ function fmtAt(iso){try{return new Date(iso).toLocaleString('en-GB',{day:'2-digi
 const nameOf=id=>id?(ADM.names[id]||'a team member'):'unknown';
 function renderAdmin(){
   if(!$('#v-admin'))return;
+  renderAuth();
   const badges=[];
   badges.push(ADM.can?'<span class="bdg c-good">Editor access</span>':'<span class="bdg c-mute">View only</span>');
   const nLive=Object.keys(LIVE).length,f=HAS.indexOf(true),l=HAS.lastIndexOf(true);
@@ -1450,7 +1477,7 @@ function renderAdmin(){
     if(live){tag='<span class="bdg c-warn">Uploaded</span>';det=`<b>${esc(live.source||'file')}</b> · ${esc(fmtAt(live.at))}<br>by ${esc(nameOf(live.by))}`}
     else if(n){tag='<span class="bdg c-info">Original</span>';det='From the original workbook'}
     else{tag='<span class="bdg c-mute">No data</span>';det='Not reported yet'}
-    const act=live&&ADM.can?`<button class="btn ghost sm" data-rv="${i}" type="button">${BASE_RAW[i].length?'Revert':'Remove'}</button>`:'';
+    const act=live&&ADM.can&&okFor('dashboard')?`<button class="btn ghost sm" data-rv="${i}" type="button">${BASE_RAW[i].length?'Revert':'Remove'}</button>`:'';
     return`<div class="mrow"><span class="m">${m}</span><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tag}<span class="num" style="font-size:12.5px">${n?fmt(n)+' NTT':''}</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
   }).join('')+frRow()+sbRow();
   // history
@@ -1480,6 +1507,8 @@ function renderAdmin(){
   let msg=ADM.sheets.some(s=>s.ok&&s.cmp==='same')&&!pl.length&&!frSel&&!sbSel?'Everything in this file is already on the dashboard. Nothing to publish.':'Nothing selected.',can=false;
   if(clash.size)msg=`Two selected sheets use ${[...clash].map(i=>MN[i]).join(', ')}. Give each sheet its own month.`;
   else if(pl.length||frSel||sbSel){can=ADM.can&&ADM.dbOk&&!ADM.busy;msg=(pl.length?`<b>${pl.length} month${pl.length>1?'s':''}</b> (${pl.map(s=>MN[s.month]).join(', ')}) · <b>${fmt(tot)}</b> tickets. Only these months are written; the rest stay as they are.`:'')+(frSel?(pl.length?' ':'')+'<b>Fault rate</b> table will be updated.':'')+(sbSel?((pl.length||frSel)?' ':'')+`<b>Submarine</b> data (${fmt(ADM.sb.rows.length)} NTT) will be replaced.`:'')}
+  const lockMsg=[(pl.length||frSel)&&!okFor('dashboard')?'dashboard':'',sbSel&&!okFor('submarine')?'submarine':''].filter(Boolean);
+  if(lockMsg.length){can=false;msg+=` <span class="wait">Unlock the ${lockMsg.join(' and ')} passcode under Publishing access to publish this.</span>`}
   const sm=$('#a-sum');sm.innerHTML=msg;
   $('#publish').disabled=!can;
   if(ADM.can&&!ADM.dbOk)sm.innerHTML+=' <span class="wait">Shared storage is not available in this view.</span>';
@@ -1528,7 +1557,7 @@ async function doPublish(){
   if(done.length||frDone||sbDone){buildData();render();
     await log({kind:'publish',at:new Date().toISOString(),by:ADM.me||null,file:ADM.file.name.slice(0,120),months:done.map(s=>s.month),counts:done.map(s=>s.total),fr:frDone,sb:sbDone});
     loadHist()}
-  if(fail.length)res('bad',`<b>${done.length?'Partly published.':'Not published.'}</b> ${fail.map(([s,e])=>`${MN[s.month]}: ${e&&e.message==='too large'?'sheet is too large for one month':e&&e.code==='permission_denied'?'you do not have permission to write data':'the save failed, try again'}`).join('; ')}.`);
+  if(fail.length)res('bad',`<b>${done.length?'Partly published.':'Not published.'}</b> ${fail.map(([s,e])=>`${MN[s.month]}: ${e&&e.message==='too large'?'sheet is too large for one month':e&&(e.code==='permission_denied'||e.code==='passcode')?'you do not have permission to write data (check your passcode)':'the save failed, try again'}`).join('; ')}.`);
   else if(frFail)res('bad','<b>Fault rate was not saved.</b> Try again.');
   else if(sbFail)res('bad','<b>Submarine data was not saved.</b> '+(sbFail.message==='too large'?'The sheet is too large.':'Try again.'));
   else res('good',`<b>Published.</b> ${[...done.map(s=>MN[s.month]+' ('+fmt(s.total)+')'),...(frDone?['fault rate']:[]),...(sbDone?['submarine ('+fmt(SBLIVE.rows.length)+')']:[])].join(', ')} ${done.length+(frDone?1:0)+(sbDone?1:0)>1?"are":"is"} now live on the dashboard. <button class="btn ghost sm" id="godash" type="button">View dashboard</button>`);
@@ -1587,6 +1616,7 @@ function loadHist(){
   try{
     const [db,user]=await Promise.all([claude.use('db'),claude.use('user')]);
     ADM.user=user;ADM.db=db;ADM.dbOk=!!db;
+    if(window.TNOCAUTH)await TNOCAUTH.check();
     if(user){ADM.can=await user.canEdit();try{ADM.me=await user.id()}catch(e){}
       const w=await user.can('data.write');if(w===false)ADM.can=false}
     if(db){

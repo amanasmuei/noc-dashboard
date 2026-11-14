@@ -54,7 +54,7 @@ pi-check:                 ## is the Pi reachable and does it have docker + compo
 
 pi:                       ## sync to the Pi, build, fix ./data ownership, restart, show status
 	rsync -az --delete --exclude .git --exclude dist --exclude backups --exclude data \
-	  --exclude .DS_Store --exclude .wrangler --exclude 'TNOC Dashboard*' ./ $(PI):$(PI_DIR)/
+	  --exclude .DS_Store --exclude .env --exclude .wrangler --exclude 'TNOC Dashboard*' ./ $(PI):$(PI_DIR)/
 	ssh $(PI) 'cd $(PI_DIR) && docker compose build -q \
 	  && docker compose run --rm --no-deps --user root noc sh -c "chown -R 10001:10001 /app/data && chmod -R a+r /app/data" \
 	  && docker compose up -d && docker compose ps'
