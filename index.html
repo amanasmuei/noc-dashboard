@@ -466,6 +466,21 @@ button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;
 /* submarine tab reuses the dashboard grids; only the 2-up row is new */
 .r2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
 @media (max-width:980px){.r2e{grid-template-columns:minmax(0,1fr)}}
+
+/* submarine route map */
+.sbland{fill:color-mix(in srgb,var(--muted) 24%,var(--canvas));stroke:none}
+.sbc{cursor:pointer}
+.sbc .ln{fill:none;stroke-linecap:round;stroke-linejoin:round;transition:opacity .15s}
+.sbc .pen{fill:none;stroke:var(--orange);stroke-width:7;opacity:.22;stroke-linecap:round}
+.sbc .hit{fill:none;stroke:transparent;stroke-width:14}
+.sbc:hover .ln{filter:brightness(1.25)}
+.sbc.sel .ln{filter:drop-shadow(0 0 3px var(--orange))}
+.sbc.dim{opacity:.3}
+.sbd{fill:var(--surface);stroke:var(--ink2);stroke-width:1.2}
+.sbl{font-size:10px;font-weight:500;fill:var(--ink)}
+.sbe{font-size:9.5px;fill:var(--muted)}
+.sbe.dim{opacity:.4}
+.mch small{font-size:10px;color:var(--muted)}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -532,6 +547,10 @@ button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;
     <div class="sbmeta" id="sb-meta"></div>
     <div class="kpis" id="sb-kpis"></div>
     <div class="card" id="sb-ins" hidden></div>
+    <div class="card" id="sb-geo">
+      <div class="card-h"><h3>Cable routes &amp; faults</h3><span>Indicative routes, landing points to be verified · click a cable to filter</span></div>
+      <div class="card-b geo"><div><div class="mm" id="sb-mm"></div><div class="tiles" id="sb-tiles"></div><div class="gleg" id="sb-leg"></div></div><div class="gw" id="sb-why"></div></div>
+    </div>
     <div class="r2">
       <div class="card"><div class="card-h"><h3>Submarine NTT by month</h3><span class="lgd"><i style="background:var(--mark2)"></i>Service affecting<i style="background:var(--mark)"></i>Non-service<i style="background:var(--line)"></i>Not stated</span></div><div class="card-b"><div class="trend" id="sb-trend"></div></div></div>
       <div class="card"><div class="card-h"><h3>NTT by cable</h3><span>Number of NTT</span></div><div class="card-b"><div class="scr" id="sb-cable"></div></div></div>
@@ -1173,6 +1192,86 @@ function sBar(k,el,order){
   const mx=Math.max(1,...items.map(x=>x.v)),sel=SF[k].size>0,tot=items.reduce((a,x)=>a+x.v,0);
   $(el).innerHTML=items.map(x=>`<button class="brow${sel&&!SF[k].has(x.n)?' dim':''}" data-sk="${k}" data-sv="${esc(x.n)}" data-tip="${esc(T(x.l,[['NTT',x.v],['Share',tot?pc(x.v/tot):'–']]))}"><span class="l" title="${esc(x.l)}">${esc(x.l)}</span><span class="bar"><i style="width:${x.v/mx*100}%"></i></span><span class="n num">${x.v}</span></button>`).join('')||'<p class="hint">No NTT for this selection.</p>';
 }
+/* ---------- submarine: cable route map ----------
+   INDICATIVE ONLY: waypoints and landing stations are a drafted schematic, not surveyed routes.
+   Verify each entry with the cable owners before relying on it. Edit SBR / SBL to correct. Land: Natural Earth 1:50m (public domain). */
+const SBM={x0:55,y1:38,k:10,w:870,h:480,land:"M880 500L582 500L777 500L777 496L768 493L770 492L772 493L773 492L777 495L780 494L782 497L792 500L805 500L809 498L809 500L807 500L819 500L804 500L870 500L872 489L875 487L878 491L880 500ZM727 372L729 372L732 366L737 364L737 369L733 373L739 378L730 375L729 377L730 382L734 389L730 387L727 382L726 372L724 369L726 362L730 358L729 362L730 367L727 370L727 372ZM623 296L622 296L623 293L642 275L643 270L646 267L647 275L642 279L638 281L634 287L623 296ZM675 264L678 264L679 266L682 265L681 267L678 272L670 276L671 264L669 261L675 264ZM681 289L676 285L674 282L679 279L678 275L680 271L683 270L686 272L682 281L683 287L681 289ZM696 267L699 266L700 268L700 272L703 277L701 278L700 276L700 280L698 278L698 272L697 270L694 271L693 265L696 267ZM702 255L705 258L705 264L707 270L702 269L700 267L700 262L694 258L693 254L702 255ZM657 245L662 246L665 249L665 254L662 258L659 255L657 248L653 246L657 245ZM835 463L833 464L827 464L831 456L838 454L840 457L835 463ZM748 409L756 411L759 416L758 419L748 413L745 413L745 415L739 412L735 414L731 412L729 415L729 412L732 409L748 409ZM719 411L722 414L722 416L717 418L711 414L711 411L719 411ZM678 466L660 469L649 469L648 467L649 464L656 462L664 466L670 465L673 466L679 463L679 462L678 462L679 461L680 463L678 466ZM650 474L656 477L658 481L653 482L646 478L641 477L640 475L643 474L650 474ZM632 463L636 463L637 464L639 463L641 467L635 469L634 467L621 471L618 470L618 465L622 464L626 464L630 467L632 466L628 463L628 461L631 461L632 463ZM616 466L616 469L609 468L611 467L611 464L614 462L617 463L616 466ZM604 462L607 464L601 468L601 466L595 462L604 462ZM510 397L514 405L518 406L516 409L517 411L510 408L508 402L501 400L505 396L506 395L507 397L507 395L509 395L510 397ZM723 464L715 469L704 473L694 481L689 483L686 483L687 476L699 470L702 466L720 463L723 464ZM710 287L712 287L713 290L711 294L714 295L715 298L716 308L712 311L712 317L708 307L707 307L704 313L706 315L707 320L703 324L702 319L699 321L691 316L690 310L692 306L687 302L685 302L684 306L681 303L678 305L676 302L671 311L670 310L669 308L672 301L679 298L684 293L688 296L688 300L692 298L694 294L697 294L699 290L701 291L702 290L705 290L705 282L710 287ZM661 194L668 197L673 195L672 203L675 209L671 218L666 221L664 227L667 233L668 238L672 241L672 239L676 237L679 238L681 242L683 242L683 239L688 242L685 244L688 249L691 250L691 254L689 253L689 251L683 250L682 246L676 241L675 241L677 246L676 248L668 241L663 244L658 241L656 242L656 238L659 234L656 231L656 235L654 235L651 231L648 217L652 220L654 219L654 204L656 195L661 194ZM785 387L791 388L793 394L791 397L792 403L795 408L795 406L796 405L797 409L798 409L799 412L801 413L805 413L814 403L821 401L821 398L828 395L848 403L856 404L857 406L862 406L880 413L880 487L880 455L880 463L872 462L880 464L880 471L876 473L872 472L861 472L850 462L851 459L849 461L844 462L842 460L839 462L841 456L837 453L842 452L836 449L839 449L834 443L834 438L832 438L833 437L831 437L831 435L823 429L810 425L802 425L797 421L799 419L790 418L787 415L788 411L785 414L784 419L782 421L779 421L778 413L770 408L772 407L777 408L782 404L787 406L789 401L773 402L770 400L769 396L760 394L763 389L774 384L785 387ZM699 370L694 375L688 377L680 375L656 375L652 377L650 382L651 386L657 394L661 393L666 388L670 389L682 386L684 388L684 390L679 389L673 396L667 399L664 399L673 409L674 412L673 416L677 421L678 421L679 424L671 425L670 428L666 428L665 426L666 421L659 415L661 408L657 407L653 409L654 417L653 431L654 436L646 436L644 433L646 420L645 415L640 415L639 414L638 407L641 405L643 399L643 394L645 389L647 387L648 389L647 381L653 370L656 371L661 367L666 369L678 372L689 371L701 363L702 365L699 370ZM524 440L527 442L533 443L537 448L554 449L558 444L562 447L565 446L575 449L578 456L580 457L591 456L594 458L594 464L596 468L583 463L577 464L565 463L543 457L529 457L515 454L515 451L512 449L503 448L508 445L511 439L518 441L520 439L524 440ZM415 328L425 328L432 336L433 339L447 348L455 358L459 361L458 358L460 357L465 363L470 366L474 372L480 374L480 376L476 378L483 375L487 377L488 380L484 382L484 386L487 389L494 390L495 398L498 401L497 406L500 404L504 404L510 411L508 416L509 430L507 438L503 435L501 437L496 435L496 439L466 412L459 402L453 388L447 380L442 376L436 361L427 356L426 352L420 344L414 342L406 333L402 327L402 324L406 324L415 328ZM618 313L622 311L623 313L627 316L625 321L630 319L631 321L630 323L634 322L643 326L641 329L633 330L632 332L635 336L630 337L627 337L625 339L628 343L621 344L623 346L624 348L626 349L626 351L631 357L628 360L640 370L635 372L629 369L630 371L625 378L626 388L619 392L617 390L618 393L613 398L614 398L613 401L615 402L615 404L613 406L613 409L612 410L613 411L610 416L597 422L595 414L593 414L593 412L587 415L586 412L583 412L580 409L578 413L573 413L569 416L567 409L559 411L559 409L553 410L550 399L550 393L547 389L543 388L544 386L541 384L543 380L539 376L539 372L540 369L541 367L540 368L541 365L546 360L549 362L562 366L560 364L563 359L562 356L564 356L565 353L580 348L589 338L590 334L600 330L600 331L604 330L606 328L604 326L606 324L609 324L618 310L618 313ZM862 -10L870 -10L867 -10L865 -4L861 -3L860 -1L860 9L856 18L859 23L856 24L854 28L849 31L848 30L848 27L851 25L850 23L846 26L847 29L845 27L842 28L839 34L838 33L839 30L837 29L832 34L821 34L823 32L819 33L818 29L815 33L819 37L813 38L809 44L807 45L805 44L801 40L801 37L804 34L797 32L781 37L773 37L771 42L767 39L759 40L760 36L764 36L779 25L790 25L802 23L803 25L808 25L811 22L811 19L817 13L818 6L823 5L819 9L820 12L823 12L833 8L839 2L844 -1L849 -10L851 -10L847 -10L862 -10ZM794 37L796 38L797 42L794 44L792 48L786 45L783 46L778 52L775 51L774 46L770 47L776 43L779 39L782 41L786 40L786 38L789 37L794 37ZM762 44L767 44L765 47L769 47L770 51L767 55L763 66L761 66L761 67L757 70L758 63L756 64L756 68L751 66L753 64L752 59L756 54L755 53L755 52L752 48L752 51L753 51L753 53L751 52L748 54L747 49L750 51L746 48L757 41L762 44ZM660 154L658 161L657 160L651 149L651 143L660 130L666 127L669 130L664 148L660 154ZM559 180L560 183L556 187L555 193L551 196L545 198L537 195L537 187L543 181L552 179L556 180L557 179L559 180ZM250 282L253 282L257 286L264 296L269 307L266 316L257 320L251 318L249 312L247 298L247 297L248 300L251 284L254 285L250 282ZM588 451L581 452L577 451L581 449L591 450L588 451ZM684 286L684 280L690 267L690 276L687 279L684 286ZM696 282L691 284L688 282L693 278L696 280L696 282ZM687 257L690 260L690 262L685 258L682 261L682 254L687 257ZM758 380L763 383L760 384L756 381L759 383L758 384L757 383L752 382L758 380ZM797 437L797 443L794 443L792 441L793 438L792 437L796 434L797 437ZM682 426L682 428L681 427L680 431L682 433L676 437L679 426L681 424L682 426ZM763 460L761 460L761 457L766 451L766 456L763 460ZM532 410L531 412L529 411L526 412L527 406L532 407L532 410ZM425 365L429 370L428 374L421 366L425 365ZM442 398L438 396L436 392L437 390L439 390L443 396L442 398ZM377 265L375 261L378 258L379 246L381 245L377 265ZM-10 -10L880 -10L724 -10L728 -10L732 -7L741 3L744 9L744 19L746 21L742 28L735 29L734 31L730 30L727 30L727 33L724 32L725 34L723 35L722 35L722 32L715 37L713 33L716 32L714 32L713 28L716 24L715 24L718 21L715 18L715 13L712 12L715 10L719 12L720 11L717 8L716 2L714 1L711 3L708 0L704 3L700 1L702 -1L697 -1L701 -6L706 -7L702 -8L704 -10L667 -10L666 -9L662 -7L661 -9L668 -10L663 -10L673 -10L628 -10L626 -9L626 -6L628 -3L639 -0L641 3L640 7L643 9L648 8L653 3L658 2L666 5L677 6L673 12L669 10L658 14L659 16L657 16L656 19L654 19L653 18L652 18L651 19L653 20L644 27L642 32L653 37L659 50L659 53L663 56L669 62L669 63L667 63L655 59L650 61L657 60L667 67L669 71L664 72L658 76L652 78L655 77L656 79L663 77L671 81L665 85L669 84L670 85L669 89L667 87L664 89L667 90L665 91L667 91L665 94L666 97L661 97L660 100L657 100L658 101L656 106L651 113L649 114L648 112L646 112L649 117L645 119L641 119L643 121L646 120L646 126L642 126L643 128L640 128L639 131L636 132L637 134L631 134L628 135L631 138L625 142L624 144L623 143L619 144L615 151L605 153L602 152L599 154L597 152L596 155L593 155L593 157L589 156L590 155L585 149L583 151L586 154L585 158L581 159L581 158L580 161L576 162L574 160L573 163L569 162L566 164L560 165L556 168L554 167L552 171L555 175L553 177L549 177L547 171L549 165L545 163L545 165L541 166L541 164L538 164L536 161L535 161L535 164L528 165L522 171L517 170L518 173L515 177L510 181L506 190L509 195L515 201L515 203L514 203L528 217L530 217L538 226L543 241L544 254L543 252L542 254L543 260L540 267L523 276L520 273L519 276L516 275L518 277L515 277L518 279L516 281L511 278L516 284L514 284L508 280L512 286L505 289L501 294L498 294L499 293L498 284L501 281L500 279L497 278L493 275L489 273L486 274L487 271L485 269L482 271L481 265L476 258L475 259L467 253L459 253L460 246L456 244L450 246L450 258L442 277L443 287L448 287L450 294L453 297L455 308L453 302L452 304L454 308L460 311L465 311L482 327L485 333L484 351L490 357L493 365L492 366L490 364L490 365L485 367L484 365L463 351L463 347L457 340L453 320L451 316L447 311L446 306L444 306L437 297L433 298L432 292L437 278L436 280L435 273L439 263L436 263L436 248L432 240L431 243L429 233L430 233L428 231L426 220L427 214L424 215L422 209L419 206L419 210L418 213L414 215L412 212L413 216L408 218L404 223L403 219L402 222L399 222L399 218L397 221L397 215L394 219L392 220L396 204L390 187L389 191L385 186L388 188L390 186L386 182L387 181L382 179L381 181L380 179L381 176L378 178L377 174L377 177L373 172L371 168L369 156L365 151L359 154L357 150L356 144L356 146L353 145L356 147L354 152L356 156L352 162L351 161L352 158L349 159L350 155L346 162L345 157L344 163L341 161L341 159L339 161L341 163L339 163L337 164L336 159L336 163L333 162L331 164L332 159L329 156L332 159L329 162L321 165L319 168L320 173L318 177L314 180L312 179L312 181L306 183L305 181L302 182L302 184L304 184L298 189L291 197L274 209L273 214L268 217L263 217L260 222L256 221L253 223L251 229L253 245L252 243L251 244L253 246L247 267L248 268L248 277L243 277L239 284L240 287L244 288L240 287L234 289L232 291L231 296L225 299L221 297L216 291L213 285L212 281L215 285L213 281L207 266L199 254L194 235L189 229L188 223L187 223L183 215L179 194L180 190L180 188L178 190L178 189L178 187L180 187L178 186L177 182L179 173L176 166L177 165L176 165L181 162L175 163L177 160L175 160L176 158L178 158L172 157L173 159L170 162L173 165L170 168L157 173L151 169L140 157L141 156L143 157L152 154L155 149L147 152L138 149L134 144L138 141L132 144L132 141L131 142L126 141L123 138L122 132L117 131L117 128L114 124L111 125L115 126L98 127L97 128L91 126L86 126L85 128L64 129L55 126L54 127L40 126L23 122L20 112L17 109L11 109L-2 115L-10 113L-10 75L-10 140L-10 138L-6 137L-3 132L14 116L14 130L19 138L22 141L36 144L44 153L48 156L44 165L39 169L35 176L32 176L32 174L29 178L27 183L28 190L18 192L14 200L5 202L1 210L-10 211L-10 254L-10 80L-10 500L-10 -10Z"};
+const sbXY=(lo,la)=>[(lo-SBM.x0)*SBM.k,(SBM.y1-la)*SBM.k];
+const SBL={Tuas:[103.63,1.3,'Singapore|7|13|start'],Melaka:[102.25,2.19,'Melaka|-6|9|end'],Penang:[100.3,5.4,'Penang|-6|3|end'],Mersing:[103.84,2.43,'Mersing|6|0|start'],Kuantan:[103.33,3.8,'Kuantan|6|-2|start'],Kuching:[110.35,1.55,'Kuching|6|10|start'],'Kota Kinabalu':[116.07,5.98,'Kota Kinabalu|6|-4|start'],Brunei:[114.95,4.95,''],'Vung Tau':[107.08,10.35,''],'Hong Kong':[114.17,22.3,''],Batangas:[121.0,13.76,''],Songkhla:[100.6,7.2,''],Sihanoukville:[103.5,10.63,''],Satun:[100.05,6.62,''],Cochin:[76.27,9.97,''],Mumbai:[72.8,19.0,''],Colombo:[79.85,6.9,''],Fujairah:[56.35,25.12,''],Karachi:[67.0,24.8,''],"Cox's Bazar":[91.98,21.45,''],Chennai:[80.27,13.08,''],Shantou:[116.7,23.35,''],Fangshan:[120.65,22.05,''],Busan:[129.05,35.1,''],Chikura:[139.95,34.95,'']};
+/* strings = landing stations, [lon,lat] = unmarked waypoint, {e:[lon,lat,label]} = leaves the map */
+const SBR={
+ SMW4:[{e:[55,25.5,'Europe']},'Fujairah','Karachi','Mumbai',[73.5,10.5],'Colombo',[82.6,8.6],'Chennai',[88,15],"Cox's Bazar",[91.5,12],[95,7.2],'Satun',[99.3,4.6],'Melaka','Tuas'],
+ SMW5:[{e:[55,20.5,'Europe']},'Fujairah','Karachi','Mumbai',[74,9.2],'Colombo',[86,11],"Cox's Bazar",[92.5,11],[96,6.6],'Satun',[99,4.1],'Melaka','Tuas'],
+ BBG:[{e:[55,23,'Middle East']},'Fujairah',[65,21],'Mumbai',[73,10],'Colombo',[88,7.6],[95,7.3],'Penang',[99.6,3.7],'Tuas'],
+ SAFE:[{e:[55,-7,'Africa']},[62,-3],[72,3],'Cochin',[76,6.4],[80,5.2],[93,6.8],'Penang'],
+ AAG:['Tuas','Mersing',[106,4],'Brunei','Vung Tau',[111.8,19],'Hong Kong',[117.5,17.5],'Batangas',[124,12],{e:[142,14,'USA via Guam & Hawaii']}],
+ APCN2:['Tuas','Mersing',[108.6,8.5],[112.5,17.2],'Hong Kong','Shantou','Fangshan',[124.6,27],[127.6,33.6],'Busan',[129.4,33.2],[130.2,30.4],[136,32.8],[139.2,34.2],'Chikura'],
+ MCT:['Mersing',[104.6,4.2],[103,7.6],'Songkhla',[102.4,8.7],'Sihanoukville'],
+ SKR1M:['Kuantan',[106.6,3.4],[109.5,2.6],'Kuching',[112.2,3.9],[113.7,5.6],[115.2,6.3],'Kota Kinabalu']
+};
+const SBR_OFF={SMW4:-3,SMW5:3,BBG:0,SAFE:0,AAG:0,APCN2:0,MCT:0,SKR1M:0};
+function sbPts(c){return SBR[c].map(it=>typeof it==='string'?{xy:sbXY(...SBL[it].slice(0,2)),n:it}:Array.isArray(it)?{xy:sbXY(it[0],it[1]+(SBR_OFF[c]||0)*0.12)}:{xy:sbXY(it.e[0],it.e[1]),e:it.e[2]})}
+function sbSpline(p){
+  let d=`M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+  for(let i=0;i<p.length-1;i++){const a=p[i-1]||p[i],b=p[i],c=p[i+1],e=p[i+2]||c;
+    d+=`C${(b[0]+(c[0]-a[0])/6).toFixed(1)} ${(b[1]+(c[1]-a[1])/6).toFixed(1)} ${(c[0]-(e[0]-b[0])/6).toFixed(1)} ${(c[1]-(e[1]-b[1])/6).toFixed(1)} ${c[0].toFixed(1)} ${c[1].toFixed(1)}`}
+  return d;
+}
+const SBMM=[['n','NTT count'],['s','Service affecting'],['p','Pending'],['t','Median restoration']];
+let SBMAPM='n';
+function sbStats(rows){
+  const n=rows.length,sa=rows.filter(r=>r.impact==='Service affecting').length,imp=rows.filter(r=>r.impact!=='Not stated').length,pend=rows.filter(r=>r.open).length;
+  const md=median(rows.filter(r=>r.status==='Closed'&&r.dur>=0).map(r=>r.dur));
+  return{n,sa,imp,pend,md};
+}
+function sbVal(s){
+  if(!s.n)return{x:0,t:'–'};
+  if(SBMAPM==='n')return{x:s.n,t:fmt(s.n)};
+  if(SBMAPM==='s'){const p=s.imp?s.sa/s.imp:0;return{x:p,t:s.imp?pc(p,0):'–'}}
+  if(SBMAPM==='p')return{x:s.pend,t:fmt(s.pend)};
+  return{x:s.md||0,t:s.md==null?'–':fdur(s.md)};
+}
+function renderSubMap(){
+  if(!$('#sb-tiles'))return;
+  const base=sRows('cable'),sel=SF.cable,anySel=sel.size>0;
+  const names=[...new Set(sbRows().map(r=>r.cable))];
+  const st={};names.forEach(c=>st[c]=sbStats(base.filter(r=>r.cable===c)));
+  const val={};names.forEach(c=>val[c]=sbVal(st[c]));
+  const mx=Math.max(1e-9,...names.map(c=>val[c].x));
+  const pct=c=>st[c].n?Math.round(12+88*val[c].x/mx):0;
+  const colr=c=>st[c].n?`color-mix(in srgb,var(--mark) ${Math.round(30+70*(pct(c)-12)/88)}%,var(--canvas))`:'var(--line)';
+  const wid=c=>st[c].n?(2+3*val[c].x/mx).toFixed(1):2;
+  const tip=c=>esc(T(c,[['NTT',st[c].n],['Service affecting',st[c].imp?pc(st[c].sa/st[c].imp,0):'–'],['Pending',st[c].pend],['Median restoration',st[c].md==null?'–':fdur(st[c].md)]]));
+  const mapped=names.filter(c=>SBR[c]),unmapped=names.filter(c=>!SBR[c]);
+  const served={};
+  let lines='',ends='';
+  mapped.slice().sort((a,b)=>(sel.has(a)?1:0)-(sel.has(b)?1:0)).forEach(c=>{
+    const pts=sbPts(c);pts.forEach(p=>{if(p.n)(served[p.n]=served[p.n]||[]).push(c)});
+    const d=sbSpline(pts.map(p=>p.xy)),dim=anySel&&!sel.has(c),on=sel.has(c);
+    lines+=`<g class="sbc${dim?' dim':''}${on?' sel':''}" data-sk="cable" data-sv="${esc(c)}" data-tip="${tip(c)}">${st[c].pend?`<path class="pen" d="${d}"/>`:''}<path class="ln" d="${d}" style="stroke:${colr(c)};stroke-width:${wid(c)}"/><path class="hit" d="${d}"/></g>`;
+    pts.forEach(p=>{if(p.e){const x=p.xy[0],y=p.xy[1],right=x>SBM.w/2;ends+=`<text class="sbe${dim?' dim':''}" x="${(right?x-6:x+6).toFixed(0)}" y="${(y-5).toFixed(0)}" text-anchor="${right?'end':'start'}">${esc(c)} → ${esc(p.e)}</text>`}});
+  });
+  const dots=Object.keys(served).map(n=>{const l=SBL[n],[x,y]=sbXY(l[0],l[1]);return `<circle class="sbd" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" data-tip="${esc(T(n,[['Cables',served[n].join(', ')]]))}"/>`+(l[2]?(([t,dx,dy,an])=>`<text class="sbl" x="${(x+ +dx).toFixed(0)}" y="${(y+ +dy+3).toFixed(0)}" text-anchor="${an}">${t}</text>`)(l[2].split('|')):'')}).join('');
+  const chips=names.slice().sort((a,b)=>val[b].x-val[a].x||a.localeCompare(b)).map(c=>`<button type="button" data-sk="cable" data-sv="${esc(c)}" aria-pressed="${sel.has(c)}" class="${anySel&&!sel.has(c)?'dim':''}" data-tip="${tip(c)}"><i style="background:${colr(c)}"></i>${esc(c)}${SBR[c]?'':' <small>no route</small>'} <b class="num">${val[c].t}</b></button>`).join('');
+  $('#sb-mm').innerHTML=SBMM.map(([k,l])=>`<button type="button" data-smm="${k}" aria-pressed="${SBMAPM===k}">${l}</button>`).join('');
+  $('#sb-tiles').innerHTML=`<svg viewBox="0 0 ${SBM.w} ${SBM.h}" role="img" aria-label="Schematic map of submarine cable routes coloured by ${SBMM.find(x=>x[0]===SBMAPM)[1]}"><path class="sbland" d="${SBM.land}"/>${lines}${dots}${ends}</svg><div class="mch">${chips}</div>`;
+  $('#sb-leg').innerHTML=`<span>Low</span><i></i><span>High</span><span style="margin-left:auto">${unmapped.length?'No route drawn yet: '+unmapped.map(esc).join(', ')+' · orange halo = has pending NTT':'Orange halo = has pending NTT'}</span>`;
+  /* panel for the current selection */
+  const R=sRows(),s=sbStats(R),all=sbStats(sbRows());
+  const title=sel.size?(sel.size<=2?[...sel].join(' + '):[...sel][0]+' + '+(sel.size-1)+' more'):'All cables';
+  if(!s.n){$('#sb-why').innerHTML=`<h4>${esc(title)}</h4><p class="empty">No NTT for the current filters.</p>`;return}
+  const cc=[...sCounts('cat').entries()].sort((a,b)=>b[1]-a[1]),tc=cc[0];
+  let ins=`<b>${esc(title)}:</b> <b>${esc(tc[0])}</b> is the biggest fault category (${pc(tc[1]/s.n,0)} of NTT).`;
+  if(s.imp)ins+=` ${pc(s.sa/s.imp,0)} of NTT with impact stated were service affecting${all.imp&&sel.size?`, against ${pc(all.sa/all.imp,0)} across all cables`:''}.`;
+  if(s.pend)ins+=` ${s.pend} still pending.`;
+  const mxc=Math.max(1,...cc.map(x=>x[1])),onC=SF.cat.size>0;
+  $('#sb-why').innerHTML=`<h4>${esc(title)}</h4>
+    <div class="st"><div><b class="num">${fmt(s.n)}</b><span>NTT</span></div><div><b class="num">${s.imp?pc(s.sa/s.imp,0):'–'}</b><span>service affecting</span></div><div><b class="num">${fmt(s.pend)}</b><span>pending</span></div><div><b class="num">${s.md==null?'–':fdur(s.md)}</b><span>median restoration</span></div></div>
+    <p class="ins">${ins}</p>
+    <h5>Fault category</h5>${cc.slice(0,6).map(([n,v])=>`<button class="brow${onC&&!SF.cat.has(n)?' dim':''}" data-sk="cat" data-sv="${esc(n)}" data-tip="${esc(T(n,[['NTT',v],['Share',pc(v/s.n)]]))}"><span class="l" title="${esc(n)}">${esc(n)}</span><span class="bar"><i style="width:${v/mxc*100}%"></i></span><span class="n num">${v}</span></button>`).join('')}`;
+}
+document.addEventListener('click',e=>{const m=e.target.closest('[data-smm]');if(m){SBMAPM=m.dataset.smm;renderSubMap()}});
+
 function renderSub(){
   if(!$('#v-subm'))return;
   const all=sbRows(),R=sRows(),mons=[...new Set(all.map(r=>r.m))].sort((a,b)=>a-b);
@@ -1180,6 +1279,7 @@ function renderSub(){
   const d=sbData(),last=all.reduce((a,r)=>r.start>a?r.start:a,'');
   $('#sb-meta').textContent=`${fmt(all.length)} NTT · ${mons.length?MN[mons[0]]+'–'+MN[mons[mons.length-1]]:'no data'} 2026${last?' · latest fault '+fdate(last):''}${SBLIVE?' · uploaded '+(SBLIVE.source||'file'):''}`;
   if(TAB==='sub'){renderSubMonths();renderSubCtl()}
+  renderSubMap();
   // KPIs
   const t=R.length,sa=R.filter(r=>r.impact==='Service affecting').length,imp=R.filter(r=>r.impact!=='Not stated').length;
   const pend=R.filter(r=>r.open),y=R.filter(r=>r.in30==='YES').length,nn=R.filter(r=>r.in30==='NO').length;
@@ -1200,10 +1300,10 @@ function renderSub(){
   // insights
   const ins=[];
   if(t){
-    const cc=[...sCounts('cat').entries()].sort((a,b)=>b[1]-a[1])[0];
-    if(cc)ins.push(`<b>${esc(cc[0])}</b> is the largest fault category: ${fmt(cc[1])} NTT, ${pc(cc[1]/t,0)} of the selection.`);
-    const cb=[...sCounts('cable').entries()].sort((a,b)=>b[1]-a[1]).slice(0,3);
-    if(cb.length>1)ins.push(`<b>${cb.map(x=>esc(x[0])).join(', ')}</b> together account for ${pc(cb.reduce((a,x)=>a+x[1],0)/t,0)} of NTT.`);
+    const ccm=sCounts('cat'),ccT=[...ccm.values()].reduce((a,b)=>a+b,0),cc=[...ccm.entries()].sort((a,b)=>b[1]-a[1])[0];
+    if(cc)ins.push(`<b>${esc(cc[0])}</b> is the largest fault category: ${fmt(cc[1])} NTT, ${pc(cc[1]/ccT,0)} of the selection.`);
+    const cbm=sCounts('cable'),cbT=[...cbm.values()].reduce((a,b)=>a+b,0),cb=[...cbm.entries()].sort((a,b)=>b[1]-a[1]).slice(0,3);
+    if(cb.length>1)ins.push(`<b>${cb.map(x=>esc(x[0])).join(', ')}</b> together account for ${pc(cb.reduce((a,x)=>a+x[1],0)/cbT,0)} of NTT.`);
     ins.push(pend.length?`<b>${fmt(pend.length)} NTT</b> are still pending${oldest?`, the oldest started ${fdate(oldest)}`:''}.`:'No NTT are pending in this selection.');
   }
   $('#sb-ins').innerHTML=ins.length?`<div class="sbins">${ins.map(x=>`<div><i></i><span>${x}</span></div>`).join('')}</div>`:'';
