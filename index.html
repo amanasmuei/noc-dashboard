@@ -463,24 +463,9 @@ button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;
 .hc.dim,.hl.dim{opacity:.38}
 .sbn{display:grid;gap:8px;padding:10px 14px 14px}.sbn>div{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--ink2)}.sbn b{color:var(--ink)}
 .sbn .bdg{flex:none;font-size:11px;padding:3px 9px}
-.r2s{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,.9fr);gap:16px}
+/* submarine tab reuses the dashboard grids; only the 2-up row is new */
 .r2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
-@media (max-width:1180px){.r2s{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
-@media (max-width:980px){.r2e,.r2s{grid-template-columns:minmax(0,1fr)}}
-/* submarine tab: left filter rail (scoped so the main dashboard is untouched) */
-#v-subm.body{display:grid;grid-template-columns:264px minmax(0,1fr);gap:16px;max-width:1500px;margin:0 auto}
-#v-subm[hidden]{display:none}
-#v-subm .rail{display:flex;flex-direction:column;gap:12px;align-self:start;position:sticky;top:calc(var(--stackh,0px) + 12px)}
-#v-subm .rail-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px}
-#v-subm .rail-top b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
-@media (max-width:980px){
-  #v-subm.body{grid-template-columns:minmax(0,1fr)}
-  #v-subm .rail{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-  #v-subm .rail>.card:first-child{grid-column:1/-1}
-  #v-subm .rt{display:inline-block}
-  #v-subm .rail:not(.open)>.card:not(:first-child){display:none}
-}
-@media (max-width:640px){#v-subm .rail{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:980px){.r2e{grid-template-columns:minmax(0,1fr)}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -542,28 +527,23 @@ button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;
 </div>
 
 <div id="v-subm" class="body" hidden>
-  <aside class="rail" id="sb-rail" aria-label="Submarine filters">
-    <div class="card"><div class="rail-top"><b>Filters <span class="tagx" id="sb-fcount">0 active</span></b><span><button class="clear rt" id="sb-rtog" aria-expanded="false">Show</button><button class="clear" id="sb-clear" disabled>Clear all</button></span></div></div>
-    <div class="card"><div class="card-h"><h3>Month</h3></div><div class="card-b"><div class="chips" id="sb-months"></div></div></div>
-    <div class="card"><div class="card-h"><h3>Cable</h3></div><div class="card-b"><div class="opts tall" id="sb-sl-cable"></div></div></div>
-    <div class="card"><div class="card-h"><h3>Fault category</h3></div><div class="card-b"><div class="opts" id="sb-sl-cat"></div></div></div>
-    <div class="card"><div class="card-h"><h3>Impact</h3></div><div class="card-b"><div class="chips" id="sb-sl-impact"></div></div></div>
-    <div class="card"><div class="card-h"><h3>NTT status</h3></div><div class="card-b"><div class="chips" id="sb-sl-status"></div></div></div>
-  </aside>
   <div class="main">
+    <div class="fact" id="sb-fact" hidden></div>
     <div class="sbmeta" id="sb-meta"></div>
     <div class="kpis" id="sb-kpis"></div>
     <div class="card" id="sb-ins" hidden></div>
-    <div class="r2s">
+    <div class="r2">
       <div class="card"><div class="card-h"><h3>Submarine NTT by month</h3><span class="lgd"><i style="background:var(--mark2)"></i>Service affecting<i style="background:var(--mark)"></i>Non-service<i style="background:var(--line)"></i>Not stated</span></div><div class="card-b"><div class="trend" id="sb-trend"></div></div></div>
       <div class="card"><div class="card-h"><h3>NTT by cable</h3><span>Number of NTT</span></div><div class="card-b"><div class="scr" id="sb-cable"></div></div></div>
       <div class="card"><div class="card-h"><h3>Impact</h3><span>Service affecting share</span></div><div class="card-b"><div class="donut" id="sb-imp"></div></div></div>
     </div>
-    <div class="r2e">
+    <div class="gr2">
+      <div class="card"><div class="card-h"><h3>Cable by month</h3><span>Number of NTT · click a cable or month to filter</span></div><div class="card-b"><div id="sb-hm"></div></div></div>
+      <div class="col">
       <div class="card"><div class="card-h"><h3>Fault category</h3><span>Grouped from fault type</span></div><div class="card-b"><div class="scr" id="sb-cat"></div></div></div>
       <div class="card"><div class="card-h"><h3>Restoration time</h3><span>Fault start to fault end</span></div><div class="card-b"><div class="scr" id="sb-bk"></div></div></div>
+      </div>
     </div>
-    <div class="card"><div class="card-h"><h3>Cable by month</h3><span>Number of NTT · click a cable or month to filter</span></div><div class="card-b"><div id="sb-hm"></div></div></div>
     <div class="r2e">
       <div class="card"><div class="card-h"><h3>NTT created by</h3><span>Normalised names</span></div><div class="card-b"><div class="scr" id="sb-creator"></div></div></div>
       <div class="card"><div class="card-h"><h3>Pending NTT</h3><span id="sb-opn"></span></div><div class="card-b" id="sb-open"></div></div>
@@ -704,10 +684,11 @@ function activeCount(){let n=0;for(const k in IDX)n+=F[k].size;return n}
 
 /* ---------- header ---------- */
 function renderMonths(){
+  if(TAB==='sub'){renderSubMonths();return}
   $('#months').innerHTML=`<button data-m="all" aria-pressed="${F.m===null}">YTD</button>`+MN.map((m,i)=>`<button data-m="${i}" aria-pressed="${F.m===i}" ${!HAS[i]?'disabled title="No data"':''}>${m}</button>`).join('');
   $('#mlab').textContent=F.m===null?'YTD 2026 · '+(HAS.indexOf(true)<0?'NO DATA':MN[HAS.indexOf(true)].toUpperCase()+'–'+MN[HAS.lastIndexOf(true)].toUpperCase()):MN[F.m].toUpperCase()+' 2026';
 }
-$('#months').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled)return;F.m=b.dataset.m==='all'?null:+b.dataset.m;render()});
+$('#months').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||b.disabled||b.dataset.sm!==undefined)return;F.m=b.dataset.m==='all'?null:+b.dataset.m;render()});
 
 /* ---------- slicers ---------- */
 function optList(k,el,sortFn){
@@ -718,6 +699,7 @@ function optList(k,el,sortFn){
   return items.map(x=>`<button class="opt${x.v?'':' zero'}" data-k="${k}" data-i="${x.i}" aria-pressed="${F[k].has(x.i)}"><span class="bx"><svg><use href="#i-tick"/></svg></span><span class="t" title="${esc(x.n)}">${esc(x.n)}</span><span class="c num">${x.v}</span></button>`).join('');
 }
 function renderSlicers(){
+  if(TAB==='sub')return;
   const ctl=$('#fctl'),open=new Set([...ctl.querySelectorAll('details[open]')].map(d=>d.dataset.dd));
   const c=counts('status');
   const order=['Closed','Resolved','Open'].map(n=>D.status.indexOf(n)).filter(i=>i>=0);
@@ -989,9 +971,11 @@ function showTip(e){const t=e.target.closest&&e.target.closest('[data-tip]');if(
   tipEl.style.left=Math.max(8,x)+'px';tipEl.style.top=Math.max(8,y)+'px'}
 document.addEventListener('pointermove',showTip);document.addEventListener('pointerdown',showTip);
 addEventListener('scroll',()=>tipEl.hidden=true,{passive:true});
+let TAB='dash';
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tabs [role="tab"]').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
-  $('#v-dash').hidden=b.dataset.v!=='dash';$('#fctl').hidden=b.dataset.v!=='dash';syncSticky();$('#v-admin').hidden=b.dataset.v!=='admin';$('#v-subm').hidden=b.dataset.v!=='sub';const sbv=b.dataset.v==='sub';$('#months').style.display=sbv?'none':'';$('#mlab').style.display=sbv?'none':'';if(sbv)renderSub();
+  TAB=b.dataset.v;$('#v-dash').hidden=TAB!=='dash';$('#fctl').hidden=TAB==='admin';syncSticky();$('#v-admin').hidden=TAB!=='admin';$('#v-subm').hidden=TAB!=='sub';
+  if(TAB==='sub')renderSub();else{renderMonths();renderSlicers()}
 }));
 $('#theme').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=dark?'light':'dark'});
 /* ---------- data layer: original workbook + shared uploads ---------- */
@@ -1149,14 +1133,28 @@ const sActive=()=>SK.reduce((a,k)=>a+SF[k].size,0);
 const fdur=m=>m<0?'–':m<60?m+' min':m<1440?(m/60).toFixed(1)+' h':(m/1440).toFixed(1)+' days';
 const fdate=s=>{if(!s)return '–';const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s);return m?`${+m[3]} ${MN[+m[2]-1]} ${m[1]}`:s};
 const median=a=>{if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),h=b.length>>1;return b.length%2?b[h]:(b[h-1]+b[h])/2};
-function sOpt(k,el){
+function sOpt(k){
   const c=sCounts(k),all=[...new Set(sbRows().map(r=>r[k]))];
   const items=all.map(n=>({n,v:c.get(n)||0})).sort((a,b)=>b.v-a.v||String(a.n).localeCompare(String(b.n)));
-  $(el).innerHTML=items.map(x=>`<button class="opt${x.v?'':' zero'}" data-sk="${k}" data-sv="${esc(x.n)}" aria-pressed="${SF[k].has(x.n)}"><span class="bx"><svg><use href="#i-tick"/></svg></span><span class="t" title="${esc(x.n)}">${esc(x.n)}</span><span class="c num">${x.v}</span></button>`).join('');
+  return items.map(x=>`<button class="opt${x.v?'':' zero'}" data-sk="${k}" data-sv="${esc(x.n)}" aria-pressed="${SF[k].has(x.n)}"><span class="bx"><svg><use href="#i-tick"/></svg></span><span class="t" title="${esc(x.n)}">${esc(x.n)}</span><span class="c num">${x.v}</span></button>`).join('');
 }
-function sChips(k,el,order){
+function sChips(k,order){
   const c=sCounts(k);
-  $(el).innerHTML=order.filter(n=>c.has(n)||SF[k].has(n)||sbRows().some(r=>r[k]===n)).map(n=>`<button class="chip" data-sk="${k}" data-sv="${esc(n)}" aria-pressed="${SF[k].has(n)}">${esc(n)}<span class="c num">${c.get(n)||0}</span></button>`).join('');
+  return order.filter(n=>c.has(n)||SF[k].has(n)||sbRows().some(r=>r[k]===n)).map(n=>`<button class="chip" data-sk="${k}" data-sv="${esc(n)}" aria-pressed="${SF[k].has(n)}">${esc(n)}<span class="c num">${c.get(n)||0}</span></button>`).join('');
+}
+function renderSubMonths(){
+  const mons=[...new Set(sbRows().map(r=>r.m))].sort((a,b)=>a-b);
+  $('#months').innerHTML=`<button data-sm="all" aria-pressed="${SF.m===null}">YTD</button>`+MN.map((m,i)=>`<button data-sm="${i}" aria-pressed="${SF.m===i}" ${!mons.includes(i)?'disabled title="No data"':''}>${m}</button>`).join('');
+  $('#mlab').textContent=SF.m===null?'YTD 2026 · '+(mons.length?MN[mons[0]].toUpperCase()+'–'+MN[mons[mons.length-1]].toUpperCase():'NO DATA'):MN[SF.m].toUpperCase()+' 2026';
+}
+function renderSubCtl(){
+  const ctl=$('#fctl'),open=new Set([...ctl.querySelectorAll('details[open]')].map(d=>d.dataset.dd));
+  const dd=(id,label,n,body)=>`<details class="dd${n?' on':''}" data-dd="${id}"${open.has(id)?' open':''}><summary>${label}${n?` · ${n}`:''}</summary><div class="pop"><div class="opts" style="max-height:none;mask-image:none">${body}</div></div></details>`;
+  ctl.innerHTML=`<span class="chips">${sChips('status',['Closed','Pending'])}</span><span class="sep"></span>${dd('cable','Cable',SF.cable.size,sOpt('cable'))}${dd('cat','Fault category',SF.cat.size,sOpt('cat'))}${dd('impact','Impact',SF.impact.size,sOpt('impact'))}<button class="clear" id="sb-clear" ${sActive()?'':'disabled'}>Clear all</button>`;
+  const L={cable:'Cable',cat:'Category',impact:'Impact',status:'Status',creator:'Created by',bk:'Restoration'},chips=[];
+  if(SF.m!==null)chips.push(`<button data-sm="${SF.m}">Month: ${MN[SF.m]} <i>×</i></button>`);
+  SK.forEach(k=>SF[k].forEach(v=>chips.push(`<button data-sk="${k}" data-sv="${esc(v)}">${L[k]}: ${esc(k==='bk'?SB_BK[v]:v)} <i>×</i></button>`)));
+  const fa=$('#sb-fact');fa.hidden=!chips.length;fa.innerHTML=chips.length?`<span>Filtered by</span>${chips.join('')}`:'';
 }
 function sBar(k,el,order){
   const c=sCounts(k);
@@ -1171,10 +1169,7 @@ function renderSub(){
   if(SF.m!==null&&!mons.includes(SF.m))SF.m=null;
   const d=sbData(),last=all.reduce((a,r)=>r.start>a?r.start:a,'');
   $('#sb-meta').textContent=`${fmt(all.length)} NTT · ${mons.length?MN[mons[0]]+'–'+MN[mons[mons.length-1]]:'no data'} 2026${last?' · latest fault '+fdate(last):''}${SBLIVE?' · uploaded '+(SBLIVE.source||'file'):''}`;
-  $('#sb-months').innerHTML=`<button class="chip" data-sm="all" aria-pressed="${SF.m===null}">All months</button>`+mons.map(m=>`<button class="chip" data-sm="${m}" aria-pressed="${SF.m===m}">${MN[m]}</button>`).join('');
-  sOpt('cable','#sb-sl-cable');sOpt('cat','#sb-sl-cat');
-  sChips('impact','#sb-sl-impact',SB_IMP);sChips('status','#sb-sl-status',['Closed','Pending']);
-  $('#sb-fcount').textContent=sActive()+' active';$('#sb-clear').disabled=sActive()===0;
+  if(TAB==='sub'){renderSubMonths();renderSubCtl()}
   // KPIs
   const t=R.length,sa=R.filter(r=>r.impact==='Service affecting').length,imp=R.filter(r=>r.impact!=='Not stated').length;
   const pend=R.filter(r=>r.open),y=R.filter(r=>r.in30==='YES').length,nn=R.filter(r=>r.in30==='NO').length;
@@ -1249,8 +1244,7 @@ document.addEventListener('click',e=>{
   const m=e.target.closest('[data-sm]');
   if(m){const v=m.dataset.sm==='all'?null:+m.dataset.sm;SF.m=(v!==null&&SF.m===v)?null:v;renderSub()}
 });
-$('#sb-clear').addEventListener('click',()=>{SK.forEach(k=>SF[k].clear());renderSub()});
-$('#sb-rtog').addEventListener('click',()=>{const r=$('#sb-rail');const o=r.classList.toggle('open');$('#sb-rtog').textContent=o?'Hide':'Show';$('#sb-rtog').setAttribute('aria-expanded',o)});
+document.addEventListener('click',e=>{if(e.target.closest('#sb-clear')){SK.forEach(k=>SF[k].clear());SF.m=null;renderSub()}});
 
 /* ---------- fault rate ---------- */
 let FRLIVE=null;const FRBASE={"rows":[{"k":"ALL","t":0.0042,"v":[0.0017631196847127152,0.001451980916822236,0.0016594067620825555,0.0012445550715619166,0.0022816842978635138,0.0026965359883841526,0.0035262393694254304,0.0015556938394523958,null,null,null,null]},{"k":"DWDM","t":0.007,"v":[0.0044742729306487695,0.004154682007031001,0.0044742729306487695,0.003515500159795462,0.006711409395973154,0.00798977309044423,0.009268136784915308,0.0044742729306487695,null,null,null,null]},{"k":"SDH","t":0.001,"v":[0.000177210703526493,0.000354421407052986,0,0.000177210703526493,0,0.000354421407052986,0.000886053517632465,0,null,null,null,null]},{"k":"MW","t":0.01,"v":[0.0029154518950437317,0,0,0,0.0014577259475218659,0,0,0.0014577259475218659,null,null,null,null]},{"k":"PTN","t":0.0058,"v":[0,0,0.005434782608695652,0,0,0,0,0,null,null,null,null]}]};
