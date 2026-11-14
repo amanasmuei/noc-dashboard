@@ -447,6 +447,40 @@ select{border-radius:6px}
 @media (max-width:640px){.kpi .v{font-size:24px}}
 @media (prefers-reduced-motion:no-preference){button{transition:background-color .15s ease,color .15s ease,border-color .15s ease}}
 
+.sbstk{width:100%;max-width:26px;display:flex;flex-direction:column;justify-content:flex-end;border-radius:4px 4px 0 0;overflow:hidden;min-height:2px}
+.sbstk i{display:block;width:100%}
+.lgd{display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap}.lgd i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.sbins{display:grid;gap:7px;padding:12px 14px;font-size:13px;color:var(--ink2)}
+.sbins div{display:flex;gap:10px;align-items:baseline}.sbins i{width:6px;height:6px;border-radius:50%;background:var(--mark2);flex:none;transform:translateY(-1px)}
+.sbins b{color:var(--ink)}
+.sbmeta{font-size:12px;color:var(--muted);padding:2px 2px 0}
+.sbhm{display:grid;gap:3px;align-items:center;overflow-x:auto;padding-top:6px}
+.hh{font-size:10.5px;color:var(--muted);text-align:center;padding:3px 0;border-radius:5px}
+button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;background:var(--sel)}.hh.r{text-align:right;padding-right:4px}
+.hl{font-size:12px;color:var(--ink2);text-align:left;padding:4px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl:hover{background:var(--hover)}
+.hc{height:26px;border-radius:5px;background:var(--track);display:grid;place-items:center;font:600 11.5px var(--mono)}
+.hc.dim,.hl.dim{opacity:.38}
+.sbn{display:grid;gap:8px;padding:10px 14px 14px}.sbn>div{display:flex;gap:10px;align-items:baseline;font-size:12.5px;color:var(--ink2)}.sbn b{color:var(--ink)}
+.sbn .bdg{flex:none;font-size:11px;padding:3px 9px}
+.r2s{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,.9fr);gap:16px}
+.r2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:1180px){.r2s{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:980px){.r2e,.r2s{grid-template-columns:minmax(0,1fr)}}
+/* submarine tab: left filter rail (scoped so the main dashboard is untouched) */
+#v-subm.body{display:grid;grid-template-columns:264px minmax(0,1fr);gap:16px;max-width:1500px;margin:0 auto}
+#v-subm[hidden]{display:none}
+#v-subm .rail{display:flex;flex-direction:column;gap:12px;align-self:start;position:sticky;top:calc(var(--stackh,0px) + 12px)}
+#v-subm .rail-top{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px}
+#v-subm .rail-top b{font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+@media (max-width:980px){
+  #v-subm.body{grid-template-columns:minmax(0,1fr)}
+  #v-subm .rail{position:static;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  #v-subm .rail>.card:first-child{grid-column:1/-1}
+  #v-subm .rt{display:inline-block}
+  #v-subm .rail:not(.open)>.card:not(:first-child){display:none}
+}
+@media (max-width:640px){#v-subm .rail{grid-template-columns:minmax(0,1fr)}}
 </style>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -466,6 +500,7 @@ select{border-radius:6px}
 </header>
 <div class="tabs" role="tablist">
   <button role="tab" aria-selected="true" data-v="dash">Dashboard</button>
+  <button role="tab" aria-selected="false" data-v="sub">Submarine</button>
   <button role="tab" aria-selected="false" data-v="admin">Upload data</button>
   <div class="fctl" id="fctl" aria-label="Filters"></div>
 </div>
@@ -506,6 +541,36 @@ select{border-radius:6px}
   </div>
 </div>
 
+<div id="v-subm" class="body" hidden>
+  <aside class="rail" id="sb-rail" aria-label="Submarine filters">
+    <div class="card"><div class="rail-top"><b>Filters <span class="tagx" id="sb-fcount">0 active</span></b><span><button class="clear rt" id="sb-rtog" aria-expanded="false">Show</button><button class="clear" id="sb-clear" disabled>Clear all</button></span></div></div>
+    <div class="card"><div class="card-h"><h3>Month</h3></div><div class="card-b"><div class="chips" id="sb-months"></div></div></div>
+    <div class="card"><div class="card-h"><h3>Cable</h3></div><div class="card-b"><div class="opts tall" id="sb-sl-cable"></div></div></div>
+    <div class="card"><div class="card-h"><h3>Fault category</h3></div><div class="card-b"><div class="opts" id="sb-sl-cat"></div></div></div>
+    <div class="card"><div class="card-h"><h3>Impact</h3></div><div class="card-b"><div class="chips" id="sb-sl-impact"></div></div></div>
+    <div class="card"><div class="card-h"><h3>NTT status</h3></div><div class="card-b"><div class="chips" id="sb-sl-status"></div></div></div>
+  </aside>
+  <div class="main">
+    <div class="sbmeta" id="sb-meta"></div>
+    <div class="kpis" id="sb-kpis"></div>
+    <div class="card" id="sb-ins" hidden></div>
+    <div class="r2s">
+      <div class="card"><div class="card-h"><h3>Submarine NTT by month</h3><span class="lgd"><i style="background:var(--mark2)"></i>Service affecting<i style="background:var(--mark)"></i>Non-service<i style="background:var(--line)"></i>Not stated</span></div><div class="card-b"><div class="trend" id="sb-trend"></div></div></div>
+      <div class="card"><div class="card-h"><h3>NTT by cable</h3><span>Number of NTT</span></div><div class="card-b"><div class="scr" id="sb-cable"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Impact</h3><span>Service affecting share</span></div><div class="card-b"><div class="donut" id="sb-imp"></div></div></div>
+    </div>
+    <div class="r2e">
+      <div class="card"><div class="card-h"><h3>Fault category</h3><span>Grouped from fault type</span></div><div class="card-b"><div class="scr" id="sb-cat"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Restoration time</h3><span>Fault start to fault end</span></div><div class="card-b"><div class="scr" id="sb-bk"></div></div></div>
+    </div>
+    <div class="card"><div class="card-h"><h3>Cable by month</h3><span>Number of NTT · click a cable or month to filter</span></div><div class="card-b"><div id="sb-hm"></div></div></div>
+    <div class="r2e">
+      <div class="card"><div class="card-h"><h3>NTT created by</h3><span>Normalised names</span></div><div class="card-b"><div class="scr" id="sb-creator"></div></div></div>
+      <div class="card"><div class="card-h"><h3>Pending NTT</h3><span id="sb-opn"></span></div><div class="card-b" id="sb-open"></div></div>
+    </div>
+    <div class="card"><div class="card-h"><h3>Data notes</h3><span>What was cleaned or is missing</span></div><div class="sbn" id="sb-notes"></div></div>
+  </div>
+
 <div id="v-admin" class="adm" hidden>
   <div class="adm-h">
     <div><h2>Upload data</h2><p>Add or replace monthly NTT data. Local mode: data is saved in this browser only.</p></div>
@@ -526,7 +591,7 @@ select{border-radius:6px}
           </div>
           <div class="fname" id="fname" hidden></div>
           <div class="reqs" aria-label="Required columns"><span>NTT No</span><span>Person In Charge</span><span>State</span><span>Cause Code Category</span><span>Sub Cause Code Category</span><span>Building ID</span><span>NTT Status</span><span>MTTR</span></div>
-          <p class="hint" style="padding:8px 0 0">MTTR is read as text such as “5 hours 17 minutes” or “1 days 17 hours 9 minutes”. Sheets without an “NTT No” column are skipped, except that the Fault Rate table in the Analysis sheet is read for the Fault rate chart.</p>
+          <p class="hint" style="padding:8px 0 0">MTTR is read as text such as “5 hours 17 minutes” or “1 days 17 hours 9 minutes”. Sheets without an “NTT No” column are skipped, except that a sheet with Cable, Month and Fault Type columns is read as Submarine data, and the Fault Rate table in the Analysis sheet is read for the Fault rate chart.</p>
         </div>
       </div>
       <div class="card" id="a-s2">
@@ -912,7 +977,7 @@ function render(){
   renderMonths();renderSlicers();renderKPIs();renderGeo();renderInsights();
   const np=barList('pic','#v-pic',{}),ns=barList('state','#v-state',{});
   $('#picN').textContent=np+' people';$('#stN').textContent=ns+' states';
-  renderDonut();renderTables();renderTrend();renderFR();
+  renderDonut();renderTables();renderTrend();renderFR();renderSub();
 }
 
 /* ---------- tooltip, tabs, theme ---------- */
@@ -926,7 +991,7 @@ document.addEventListener('pointermove',showTip);document.addEventListener('poin
 addEventListener('scroll',()=>tipEl.hidden=true,{passive:true});
 document.querySelectorAll('.tabs [role="tab"]').forEach(b=>b.addEventListener('click',()=>{
   document.querySelectorAll('.tabs [role="tab"]').forEach(x=>x.setAttribute('aria-selected',x===b?'true':'false'));
-  $('#v-dash').hidden=b.dataset.v!=='dash';$('#fctl').hidden=b.dataset.v!=='dash';syncSticky();$('#v-admin').hidden=b.dataset.v!=='admin';
+  $('#v-dash').hidden=b.dataset.v!=='dash';$('#fctl').hidden=b.dataset.v!=='dash';syncSticky();$('#v-admin').hidden=b.dataset.v!=='admin';$('#v-subm').hidden=b.dataset.v!=='sub';const sbv=b.dataset.v==='sub';$('#months').style.display=sbv?'none':'';$('#mlab').style.display=sbv?'none':'';if(sbv)renderSub();
 }));
 $('#theme').addEventListener('click',()=>{const r=document.documentElement,dark=r.dataset.theme==='dark'||(!r.dataset.theme&&matchMedia('(prefers-color-scheme:dark)').matches);r.dataset.theme=dark?'light':'dark'});
 /* ---------- data layer: original workbook + shared uploads ---------- */
@@ -967,13 +1032,225 @@ function buildData(){
   if(F.m!==null&&!HAS[F.m])F.m=null;
 }
 function applySnap(snap){
-  const seen=new Set();let frd=null;
-  snap.docs.forEach(s=>{if(s.id==='faultrate'){const x=s.data();if(x&&Array.isArray(x.rows))frd=x;return}const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
+  const seen=new Set();let frd=null,sbd=null;
+  snap.docs.forEach(s=>{if(s.id==='submarine'){const x=s.data();if(x&&Array.isArray(x.rows)&&x.rows.length&&Array.isArray(x.rows[0]))sbd=x;return}if(s.id==='faultrate'){const x=s.data();if(x&&Array.isArray(x.rows))frd=x;return}const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
   for(const k of Object.keys(LIVE))if(!seen.has(+k))delete LIVE[k];
-  FRLIVE=frd;
+  FRLIVE=frd;SBLIVE=sbd;
   SEEDED=seen.size>0;
   buildData();render();renderAdmin();
 }
+
+/* ---------- submarine: data ---------- */
+let SBLIVE=null;const SB_BASE={"rows":[[1,0,"SMW4","Cable Fault","Pending","Service affecting","Nur Syamimi","YES","2026-01-04T19:00","",0],[2,0,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-01-06T16:51","2026-01-06T23:13",0],[3,0,"AAG","Equipment Alarm","Closed","Service affecting","Hafiz Jaapar","YES","2026-01-09T09:20","2026-01-09T10:19",0],[4,0,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-01-10T18:53","2026-01-10T21:50",0],[5,0,"SKR1M","Equipment Alarm","Closed","Not stated","Siti Maisarah","YES","2026-01-15T03:59","2026-01-15T07:57",0],[6,0,"NUGATE","Terrestrial Cable Fault","Closed","Service affecting","Mohamad Juhairi","YES","2026-01-16T23:16","2026-01-17T06:58",0],[7,0,"NUGATE","Terrestrial Cable Fault","Closed","Service affecting","Sharilfitri","YES","2026-01-18T02:57","2026-01-18T04:25",0],[8,0,"BBG","Cable Fault","Closed","Service affecting","Sharilfitri","YES","2026-01-18T03:24","2026-01-20T22:30",0],[9,0,"NUGATE","Terrestrial Cable Fault","Closed","Service affecting","Sharilfitri","YES","2026-01-19T01:48","2026-01-19T02:55",0],[10,0,"AAG","","Pending","Non-service affecting","Amir Falah","YES","2026-01-19T10:07","",0],[11,0,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Nur Syamimi","YES","2026-01-20T03:38","2026-01-21T16:08",0],[12,0,"SMW4","Terrestrial Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-01-21T17:42","2026-01-22T00:32",0],[13,0,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-01-24T01:14","2026-01-24T07:38",0],[14,0,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-01-25T05:36","2026-01-25T05:59",0],[15,0,"AAG","Equipment Alarm","Closed","Service affecting","Hafiz Jaapar","YES","2026-01-26T09:35","",0],[16,0,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-01-26T16:40","",0],[17,0,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Akhir","YES","2026-01-28T05:17","2026-01-28T17:09",0],[18,0,"CM","Equipment Alarm","Closed","Service affecting","Sharilfitri","YES","2026-01-31T09:45","2026-01-31T12:30",0],[19,0,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-01-31T15:04","2026-01-31T19:29",0],[20,0,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-01-02T21:02","2026-02-02T02:05",0],[21,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-02-02T12:24","2026-02-02T19:44",0],[22,1,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-02-03T11:30","",0],[23,1,"AAG","Power Drop","Closed","Service affecting","Syed Mohd Fazree","YES","2026-02-03T11:30","",0],[24,1,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-02-03T11:30","",0],[25,1,"AAG","Power Drop","Closed","Service affecting","Syed Mohd Fazree","YES","2026-02-03T11:30","",0],[26,1,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-02-03T11:30","",0],[27,1,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-02-03T11:30","",0],[28,1,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-02-03T23:05","2026-02-04T00:09",0],[29,1,"AAG","Equipment Alarm","Closed","Service affecting","Siti Amira","YES","2026-02-06T15:10","",0],[30,1,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-02-07T11:42","2026-02-07T14:16",0],[31,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-02-09T04:53","2026-02-09T19:06",0],[32,1,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-02-10T14:00","",0],[33,1,"AAG","Equipment Alarm","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-02-11T09:30","",0],[34,1,"AAG","Equipment Alarm","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-02-11T10:45","",0],[35,1,"AAG","Equipment Alarm","Closed","Non-service affecting","Syed Mohd Fazree","YES","2026-02-11T11:14","",0],[36,1,"AAG","Equipment Alarm","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-02-11T12:30","",0],[37,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-02-13T14:54","2026-02-13T17:30",0],[38,1,"BBG","Power Fluctuation","Closed","Non-service affecting","","","2026-02-12T22:40","2026-02-12T22:40",0],[39,1,"BBG","Power Fluctuation","Closed","Non-service affecting","","","2026-02-13T11:30","2026-02-13T11:45",0],[40,1,"NUGATE","Terrestrial Cable Fault","Closed","Service affecting","Mohamad Juhairi","YES","2026-02-14T10:58","2026-02-14T22:59",0],[41,1,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-02-16T09:45","2026-02-16T14:26",0],[42,1,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-02-16T14:02","2026-02-16T17:44",0],[43,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-02-17T02:58","2026-02-18T06:20",0],[44,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-02-17T06:54","2026-02-17T19:27",0],[45,1,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-02-18T01:44","2026-02-18T05:40",0],[46,1,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-02-17T22:37","2026-02-18T18:22",0],[47,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-02-21T10:13","2026-02-21T14:53",0],[48,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-02-23T14:23","2026-02-23T19:20",0],[49,1,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-02-24T02:25","2026-02-24T12:36",0],[50,1,"SKR1M","","Closed","Service affecting","Muhammad Hazim","YES","2026-02-24T19:27","2026-02-24T20:15",0],[51,1,"AAG","Equipment Failure","Closed","Service affecting","Hafiz Jaapar","YES","2026-02-26T09:20","2026-02-26T10:52",0],[52,1,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-02-28T11:54","2026-02-28T18:06",0],[53,2,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-03-02T14:48","2026-03-03T06:42",0],[54,2,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-03-03T11:45","2026-03-03T15:36",0],[55,2,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-03-04T10:23","2026-03-04T12:53",0],[56,2,"BBG","Span Loss Issue","Closed","Non-service affecting","Siti Maisarah","YES","2026-03-04T09:45","2026-03-04T17:45",0],[57,2,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-03-04T11:20","2026-03-05T05:10",0],[58,2,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-03-04T10:23","2026-03-04T12:53",0],[59,2,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-03-05T04:47","2026-03-05T11:07",0],[60,2,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Nur Syamimi","YES","2026-03-07T09:26","2026-03-07T12:55",0],[61,2,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-03-10T13:50","2026-03-10T20:15",0],[62,2,"AAG","Submarine Cable Fault","Pending","Service affecting","Hafiz Yunus","YES","2026-03-10T14:58","",0],[63,2,"NUGATE","Terrestrial Cable Fault","Closed","Service affecting","Mohamad Juhairi","YES","2026-03-11T10:52","2026-03-12T00:39",0],[64,2,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-03-13T09:53","2026-03-13T12:03",0],[65,2,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-03-14T22:50","2026-03-14T22:50",0],[66,2,"SAFE","Equipment Failure","Closed","Service affecting","Siti Maisarah","YES","2026-03-16T15:54","2026-03-19T08:08",0],[67,2,"NUGATE","Equipment Failure","Closed","Non-service affecting","Risdan","YES","2026-03-17T11:43","2026-03-17T14:08",0],[68,2,"BBG","","Closed","Non-service affecting","Siti Maisarah","","2026-03-19T00:43","2026-03-20T00:08",0],[69,2,"SMW4","Terrestrial Cable Fault","Closed","Service affecting","Mohamad Juhairi","YES","2026-03-11T16:17","2026-03-11T19:47",0],[70,2,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-03-21T19:19","2026-03-22T13:35",0],[71,2,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Akhir","YES","2026-03-24T20:21","2026-03-25T14:12",0],[72,2,"AAG","Equipment Alarm","Closed","Not stated","Siti Amira","YES","2026-03-27T14:40","",0],[73,2,"BBG","Cable Fault","Closed","Not stated","Risdan","YES","2026-03-27T21:54","2026-03-28T09:15",0],[74,2,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-03-29T23:16","2026-03-30T08:30",0],[75,2,"SMW4","Terrestrial Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-03-30T02:02","2026-03-30T11:02",0],[76,2,"BBG","Internal Cable","Closed","Non-service affecting","Nur Syamimi","YES","2026-03-31T14:32","2026-03-31T15:37",0],[77,3,"SMW5","Equipment Failure","Closed","Non-service affecting","Sharilfitri","YES","2026-04-05T18:19","2026-04-05T21:01",0],[78,3,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-04-02T18:24","2026-04-02T18:47",0],[79,3,"SMW5","Card faulty","Closed","Service affecting","Sharilfitri","YES","2026-04-05T18:19","2026-04-05T21:21",0],[80,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-06T08:30","2026-04-06T13:01",0],[81,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-06T18:01","2026-04-06T19:30",0],[82,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-07T22:08","2026-04-08T03:00",0],[83,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-07T22:08","2026-04-08T03:00",0],[84,3,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-07T19:56","2026-04-08T12:26",0],[85,3,"BBG","Card faulty","Closed","Non-service affecting","Sharilfitri","YES","2026-04-08T03:00","2026-04-08T18:02",0],[86,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-04-09T12:19","2026-04-09T18:30",0],[87,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-04-11T12:10","2026-04-11T17:10",0],[88,3,"SMW4","Terrestrial Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-04-13T21:04","2026-04-13T21:52",0],[89,3,"SKR1M","Card faulty","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-14T22:10","",1],[90,3,"SMW4","Power Related Issue","Closed","Service affecting","Nur Syamimi","YES","2026-04-15T17:15","2026-04-15T17:35",0],[91,3,"SKR1M","Q Value Drop","Closed","Non-service affecting","Siti Maisarah","YES","2026-04-17T15:15","2026-04-17T16:00",0],[92,3,"AAG","Node Offline","Pending","Non-service affecting","Hafiz Jaapar","YES","2026-04-18T01:00","",0],[93,3,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Akhir","YES","2026-04-18T02:25","2026-04-19T09:32",0],[94,3,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-04-18T13:25","2026-04-18T18:05",0],[95,3,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-04-20T02:36","2026-04-21T05:24",0],[96,3,"AAG","Card faulty","Closed","Non-service affecting","Siti Amira","YES","2026-04-20T17:05","",0],[97,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-04-20T16:06","2026-04-20T21:14",0],[98,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-04-22T20:19","2026-04-22T22:54",0],[99,3,"AAG","Card faulty","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-04-23T12:05","2026-04-23T12:55",0],[100,3,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Risdan","YES","2026-04-25T17:25","2026-04-26T06:16",0],[101,3,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Risdan","YES","2026-04-28T01:09","2026-04-28T03:48",0],[102,3,"AAG","Card faulty","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-04-28T11:00","",1],[103,3,"AAG","Card faulty","Closed","Service affecting","Siti Amira","YES","2026-04-28T11:03","",1],[104,3,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-04-28T20:21","2026-04-29T00:38",0],[105,3,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-04-30T19:37","2026-04-30T20:04",0],[106,4,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Nur Syamimi","YES","2026-05-01T00:18","2026-05-01T18:50",0],[107,4,"AAG","Cable Cut","Pending","Service affecting","Muhammad Hazim","YES","2026-05-01T20:10","",0],[108,4,"CM","SFP problem","Closed","Service affecting","Muhammad Hazim","YES","2026-05-03T05:15","",0],[109,4,"SAFE","Cable Cut","Closed","Service affecting","Muhammad Hazim","YES","2026-05-04T20:29","2026-05-25T07:09",0],[110,4,"AAG","Card faulty","Pending","Service affecting","Kamelia","YES","2026-05-05T09:41","",0],[111,4,"AAG","Cable Cut","Pending","Service affecting","Mohamad Juhairi","YES","2026-05-05T11:15","",0],[112,4,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-05-06T00:20","2026-05-06T05:55",0],[113,4,"SAFE","Wavelength Issue","Closed","Service affecting","Muhammad Hazim","YES","2026-05-07T21:36","2026-05-10T10:42",0],[114,4,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-05-09T01:02","2026-05-09T01:44",0],[115,4,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-05-12T10:00","2026-05-12T13:15",0],[116,4,"BBG","Suspected Cable Cut","Closed","Non-service affecting","Siti Maisarah","YES","2026-05-12T00:32","2026-05-12T17:51",0],[117,4,"AAG","Card faulty","Closed","Service affecting","Siti Amira","YES","2026-05-22T16:20","2026-05-22T18:10",0],[118,4,"BBG","Suspected Cable Cut","Closed","Non-service affecting","Siti Maisarah","YES","2026-05-22T21:18","2026-05-23T18:11",0],[119,4,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Risdan","YES","2026-05-23T01:18","2026-05-23T02:30",0],[120,4,"BBG","Suspected Cable Cut","Closed","Non-service affecting","Sharilfitri","YES","2026-05-23T19:10","2026-05-23T22:22",0],[121,4,"AAG","Card faulty","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-05-25T14:00","2026-05-25T14:46",0],[122,4,"NUGATE","Cable cut","Closed","Non-service affecting","Hafiz Akhir","YES","2026-05-25T01:16","2026-05-25T14:15",0],[123,4,"AAG","Card faulty","Closed","Not stated","Hafiz Jaapar","YES","2026-05-26T08:30","2026-05-26T10:59",0],[124,4,"AAG","Card faulty","Closed","Not stated","Hafiz Jaapar","YES","2026-05-26T10:35","2026-05-26T11:51",0],[125,4,"AAG","Card faulty","Closed","Not stated","Hafiz Jaapar","YES","2026-05-26T10:36","2026-05-26T11:52",0],[126,4,"AAG","Power Drop","Closed","Not stated","Hafiz Jaapar","YES","2026-05-26T10:29","",0],[127,4,"NUGATE","Cable cut","Closed","Non-service affecting","Hafiz Akhir","YES","2026-05-28T01:34","2026-05-28T18:55",0],[128,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-03T11:03","",0],[129,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-03T13:30","",0],[130,5,"AAG","Power Drop","Closed","Service affecting","Syed Mohd Fazree","YES","2026-06-03T13:32","",0],[131,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-03T13:36","",0],[132,5,"BBG","Suspected Cable Cut","Closed","Non-service affecting","Nur Syamimi","YES","2026-06-03T10:42","2026-06-03T20:54",0],[133,5,"SAFE","Wavelength Down","Closed","Service affecting","Risdan","YES","2026-06-05T16:05","2026-06-05T16:20",0],[134,5,"SMW5","Dual Terrestrial Cable Cut","Closed","Service affecting","Mohamad Juhairi","YES","2026-06-07T10:24","2026-06-08T03:11",0],[135,5,"MCT","Shunt Fault","Pending","Non-service affecting","Mohamad Juhairi","YES","2026-06-08T23:08","",0],[136,5,"NUGATE","Cable cut","Closed","Non-service affecting","Siti Maisarah","YES","2026-06-13T10:18","2026-06-13T13:31",0],[137,5,"BBG","Card Faulty","Closed","Non-service affecting","Hafiz Akhir","YES","2026-06-13T13:52","2026-06-14T18:19",0],[138,5,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Hafiz Yunus","YES","2026-06-15T12:45","2026-06-15T15:43",0],[139,5,"BBG","Partial Cut","Closed","Non-service affecting","Hafiz Yunus","YES","2026-06-18T05:10","2026-06-18T08:24",0],[140,5,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Hafiz Jaapar","NO","2026-06-19T09:48","2026-06-19T15:15",0],[141,5,"SAFE","Wavelength Issue","Closed","Service affecting","Sharilfitri","YES","2026-06-19T22:15","2026-06-21T10:29",0],[142,5,"BBG","Suspected Cable Cut","Closed","Non-service affecting","Siti Maisarah","YES","2026-06-20T09:08","2026-06-20T14:13",0],[143,5,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Amir Falah","YES","2026-06-20T10:19","2026-06-20T15:03",0],[144,5,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Amir Falah","YES","2026-06-20T09:34","2026-06-20T16:28",0],[145,5,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","","YES","2026-06-24T01:06","2026-06-24T03:46",0],[146,5,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Syed Mohd Fazree","YES","2026-06-26T14:58","2026-06-26T15:03",0],[147,5,"SMW4","Suspected Cable Cut","Closed","Non-service affecting","Nur Syamimi","YES","2026-06-26T12:38","2026-06-26T18:16",0],[148,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-27T10:30","",0],[149,5,"AAG","Power Drop","Closed","Service affecting","Syed Mohd Fazree","YES","2026-06-27T10:35","",0],[150,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-27T10:41","",0],[151,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-27T10:46","",0],[152,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-27T11:00","",0],[153,5,"AAG","Power Drop","Closed","Service affecting","Syed Mohd Fazree","YES","2026-06-27T11:00","",0],[154,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-27T11:00","",0],[155,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-27T11:00","",0],[156,5,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-06-29T10:00","2026-06-29T11:06",0],[157,6,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Syed Mohd Fazree","YES","2026-07-08T01:02","2026-07-08T03:41",0],[158,6,"SKR1M","Suspected Shunt Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-07-08T08:04","2026-09-18T04:00",0],[159,6,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-07-08T09:11","2026-07-08T14:29",0],[160,6,"BBG","Suspected Cable Cut","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-07-08T17:55","2026-07-09T11:19",0],[161,6,"NUGATE","Suspected Cable Cut","Closed","Non-service affecting","Amir Falah","YES","2026-07-09T01:53","2026-07-09T14:11",0],[162,6,"BBG","Teresterial Cable Cut","Closed","Non-service affecting","Sharilfitri","YES","2026-07-10T12:36","2026-07-10T21:52",0],[163,6,"BBG","Teresterial Cable Cut","Closed","Non-service affecting","Muhammad Hazim","YES","2026-07-11T11:24","2026-07-11T15:44",0],[164,6,"AAG","Card Faulty","Closed","Service affecting","Kamelia","YES","2026-07-12T01:51","",0],[165,6,"AAG","Equipment Alarm","Closed","Service affecting","Kamelia","YES","2026-07-12T02:57","",0],[166,6,"AAG","Equipment Alarm","Closed","Service affecting","Kamelia","YES","2026-07-12T03:06","",0],[167,6,"AAG","Equipment Alarm","Closed","Service affecting","Kamelia","YES","2026-07-12T03:24","",0],[168,6,"AAG","Equipment Alarm","Closed","Service affecting","Kamelia","YES","2026-07-12T03:26","",0],[169,6,"AAG","Equipment Alarm","Closed","Service affecting","Kamelia","YES","2026-07-12T03:16","",0],[170,6,"CM","Equipment Alarm","Closed","Service affecting","Muhammad Hazim","YES","2026-07-13T01:17","2026-07-13T02:10",0],[171,6,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-07-15T04:32","",0],[172,6,"AAG","Power Drop","Closed","Service affecting","Hafiz Jaapar","YES","2026-07-15T04:35","",0],[173,6,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-07-16T19:04","2026-07-16T20:22",0],[174,6,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-07-17T05:08","2026-07-17T12:14",0],[175,6,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-07-17T22:39","2026-07-18T01:33",0],[176,6,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-07-18T22:30","2026-07-19T05:46",0],[177,6,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-07-21T04:11","2026-07-22T01:58",0],[178,6,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Amir Falah","YES","2026-07-22T12:11","",1],[179,6,"SMW4","Terrestrial Cable Fault","Closed","Service affecting","Risdan","YES","2026-07-23T15:29","2026-07-23T20:45",0],[180,6,"SMW5","Span Loss Drop","Closed","Non-service affecting","Hafiz Yunus","YES","2026-07-24T09:26","2026-07-24T19:12",0],[181,6,"APCN2","Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-07-24T09:36","2026-09-03T16:30",0],[182,6,"SAFE","Terrestrial Cable Fault","Closed","Service affecting","Risdan","YES","2026-07-25T06:19","2026-07-25T22:19",0],[183,6,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-07-27T00:19","2026-07-27T04:40",0],[184,6,"SMW5","High Board Temperature","Closed","Service affecting","Hafiz Yunus","YES","2026-07-27T05:20","2026-07-27T11:11",0],[185,6,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Syam","YES","2026-07-27T17:15","2026-07-27T20:09",0],[186,6,"AAG","Cable Fault","Pending","Service affecting","Sharilfitri","YES","2026-07-27T18:09","",0],[187,6,"BBG","Span Loss Issue","Closed","Non-service affecting","Hafiz Yunus","YES","2026-07-28T07:52","2026-08-11T11:26",0],[188,6,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-07-31T13:20","2026-08-01T05:24",0],[189,6,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Mohd Azrul","YES","2026-07-31T14:27","2026-07-31T18:27",0],[190,7,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-08-02T20:00","2026-08-03T04:20",0],[191,7,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-08-05T11:44","2026-08-05T18:00",0],[192,7,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-08-10T11:11","2026-08-10T13:48",0],[193,7,"SMW5","Terrestrial Cable Fault","Closed","Service affecting","Siti Maisarah","YES","2026-08-15T13:10","2026-08-15T16:02",0],[194,7,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-08-17T15:48","2026-08-17T19:58",0],[195,7,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-08-17T14:54","2026-08-17T18:05",0],[196,7,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-08-19T04:53","2026-08-19T12:19",0],[197,7,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-08-20T09:00","2026-08-20T14:45",0],[198,7,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-08-20T13:10","2026-08-20T19:47",0],[199,7,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-08-22T03:25","2026-08-22T20:52",0],[200,7,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-08-22T06:57","2026-08-22T12:28",0],[201,7,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Ahmad Hosni","YES","2026-08-23T11:08","2026-08-23T13:58",0],[202,7,"SAFE","Wavelength Down","Closed","Service affecting","Risdan","YES","2026-08-24T11:09","2026-08-24T13:55",0],[203,7,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-08-24T14:04","2026-08-25T08:39",0],[204,7,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Amira","YES","2026-08-26T14:58","2026-08-26T17:00",0],[205,7,"APCN2","Suspected Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-08-26T14:37","",0],[206,7,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-08-26T12:14","2026-08-26T12:31",0],[207,7,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-08-28T04:39","2026-08-28T10:50",0],[208,7,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-08-30T16:23","2026-08-31T04:57",0],[209,8,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-09-04T04:44","2026-09-04T21:41",0],[210,8,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-09-10T19:17","2026-09-10T22:17",0],[211,8,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Mohamad Juhairi","YES","2026-09-12T19:55","2026-09-13T00:28",0],[212,8,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-09-13T16:45","",1],[213,8,"SKR1M","CFP faulty","Closed","Non-service affecting","Muhammad Hazim","YES","2026-09-13T09:04","2026-09-13T09:34",0],[214,8,"APCN2","Terrestrial Cable Fault","Pending","Service affecting","Hafiz Akhir","YES","2026-09-15T09:41","",0],[215,8,"SKR1M","Card Hang","Closed","Service affecting","Hafiz Akhir","YES","2026-09-16T15:00","2026-09-16T21:06",0],[216,8,"APCN2","Suspected Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-09-17T12:46","",0],[217,8,"AAG","Suspected Cable Fault","Pending","Non-service affecting","Risdan","YES","2026-09-17T18:30","",0],[218,8,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-09-21T13:36","2026-09-21T20:08",0],[219,8,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-09-21T20:09","2026-09-21T22:10",0],[220,8,"SAFE","Terrestrial Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-09-22T01:53","2026-09-22T04:15",0],[221,8,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Nur Syamimi","YES","2026-09-24T23:31","2026-09-25T03:30",0],[222,8,"SAFE","Power Related Issue","Closed","Non-service affecting","Risdan","YES","2026-09-24T22:11","2026-09-25T05:24",0],[223,8,"BBG","Card Hang","Closed","Non-service affecting","Muhammad Hazim","YES","2026-09-26T05:00","2026-09-26T05:15",0],[224,8,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Kamelia","YES","2026-09-26T11:59","2026-09-26T14:52",0],[225,8,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Kamelia","YES","2026-09-26T15:30","2026-09-27T01:57",0],[226,8,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-09-29T10:00","2026-09-29T16:24",0],[227,8,"SAFE","Terrestrial Cable Fault","Closed","Service affecting","Hafiz Yunus","YES","2026-09-30T03:02","2026-09-30T04:14",0],[228,9,"CM","Faulty Card","Closed","Service affecting","Muhammad Hazim","YES","2026-10-01T06:50","2026-10-01T07:10",0],[229,9,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Ahmad Hosni","YES","2026-10-02T08:33","2026-10-02T13:22",0],[230,9,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Muhammad Hazim","YES","2026-10-06T09:39","2026-10-06T17:22",0],[231,9,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Akhir","YES","2026-10-08T08:30","2026-10-08T17:15",0],[232,9,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Nur Syamimi","YES","2026-10-10T05:04","2026-10-10T13:58",0],[233,9,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-10-13T13:18","2026-10-13T19:01",0],[234,9,"SMW5","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-10-14T21:18","2026-10-15T00:20",0],[235,9,"AAG","Cable Fault","Pending","Service affecting","","","2026-10-17T17:20","",0],[236,9,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Ahmad Hosni","","2026-10-16T01:00","2026-10-19T09:27",0],[237,9,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Amir Falah","YES","2026-10-19T12:06","2026-10-19T16:37",0],[238,9,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Ahmad Hosni","YES","2026-10-19T09:15","2026-10-19T15:45",0],[239,9,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-10-22T21:40","",1],[240,9,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Yunus","YES","2026-10-24T04:16","",0],[241,9,"AAG","Cable Fault","Pending","Service affecting","","","2026-10-24T07:48","",0],[242,9,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Akhir","YES","2026-10-28T02:53","2026-10-28T20:43",0],[243,10,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Hafiz Jaapar","YES","2026-11-01T14:26","2026-11-01T21:53",0],[244,10,"NUGATE","Card faulty","Closed","Service affecting","Muhammad Hazim","YES","2026-11-02T07:20","2026-11-02T15:02",0],[245,10,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-11-03T01:48","2026-11-03T05:45",0],[246,10,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Ahmad Hosni","YES","2026-11-04T15:58","2026-11-04T17:32",0],[247,10,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-11-04T08:41","2026-11-04T21:44",0],[248,10,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Maisarah","YES","2026-11-04T20:52","2026-11-05T01:46",0],[249,10,"BBG","Terrestrial Cable Fault","Closed","Non-service affecting","Risdan","YES","2026-11-04T18:02","2026-11-05T02:40",0],[250,10,"NUGATE","Terrestrial Cable Fault","Closed","Non-service affecting","Siti Amira","YES","2026-11-06T09:25","2026-11-06T11:11",0],[251,10,"BBG","Terrestrial Cable Fault","Pending","Non-service affecting","Sharilfitri","YES","2026-11-07T14:01","",0],[252,10,"SMW4","Terrestrial Cable Fault","Closed","Non-service affecting","Sharilfitri","YES","2026-11-07T17:47","2026-11-07T20:11",0],[253,10,"SMW4","Terrestrial Cable Fault","Pending","Non-service affecting","Hafiz Yunus","YES","2026-11-09T03:48","",0]],"q":{"cable":[12,10],"creator":[18,16],"type":[33,7],"swapped":138}};
+const sbData=()=>SBLIVE||SB_BASE;
+const pad2=n=>String(n).padStart(2,'0');
+function sbDP(v){
+  if(v==null||v==='')return null;
+  if(typeof v==='number'){if(!isFinite(v)||v<30000||v>80000)return null;const d=new Date(Math.round((v-25569)*1440)*60000);return{y:d.getUTCFullYear(),mo:d.getUTCMonth()+1,d:d.getUTCDate(),h:d.getUTCHours(),mi:d.getUTCMinutes()}}
+  const s=String(v).trim();let m;
+  if(m=/^(\d{4})-(\d{1,2})-(\d{1,2})[ T](\d{1,2}):(\d{2})/.exec(s))return{y:+m[1],mo:+m[2],d:+m[3],h:+m[4],mi:+m[5]};
+  if(m=/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ T,]+(\d{1,2}):(\d{2})/.exec(s)){const a=+m[1],b=+m[2];return a>12?{y:+m[3],mo:b,d:a,h:+m[4],mi:+m[5]}:{y:+m[3],mo:a,d:b,h:+m[4],mi:+m[5]}}
+  return null;
+}
+const sbSw=p=>(p.d<=12&&p.mo!==p.d)?{...p,mo:p.d,d:p.mo}:null;
+const sbMs=p=>Date.UTC(p.y,p.mo-1,p.d,p.h,p.mi);
+const sbStr=p=>`${p.y}-${pad2(p.mo)}-${pad2(p.d)}T${pad2(p.h)}:${pad2(p.mi)}`;
+function sbCat(t){
+  const s=String(t||'').toLowerCase().trim();
+  if(!s)return 'Unspecified';
+  if(/terrestrial|teresterial/.test(s))return 'Terrestrial cable';
+  if(/shunt/.test(s))return 'Shunt fault';
+  if(/cable|partial cut/.test(s)&&!/internal/.test(s))return 'Cable fault / cut';
+  if(/power/.test(s))return 'Power';
+  if(/span loss|wavelength|q value/.test(s))return 'Optical performance';
+  if(/card|equipment|sfp|cfp|node|temperature|board|internal/.test(s))return 'Equipment / card';
+  return 'Other';
+}
+function parseSub(aoa){
+  const norm2=s=>String(s==null?'':s).toLowerCase().replace(/\s+/g,' ').trim();
+  let hr=-1;
+  for(let i=0;i<Math.min(aoa.length,8);i++){const r=(aoa[i]||[]).map(norm2);if(r.includes('cable')&&r.includes('month')&&r.some(x=>x.startsWith('fault type'))){hr=i;break}}
+  if(hr<0)return null;
+  const col={};
+  (aoa[hr]||[]).forEach((c,j)=>{const n=norm2(c);
+    if(n==='month'&&col.mo===undefined)col.mo=j;
+    else if(n==='cable'&&col.cable===undefined)col.cable=j;
+    else if(n==='status'&&col.status===undefined)col.status=j;
+    else if(n.startsWith('fault type'))col.type=j;
+    else if(n.startsWith('fault start'))col.start=j;
+    else if(n.startsWith('fault end'))col.end=j;
+    else if(n.startsWith('impact'))col.impact=j;
+    else if(n.includes('within 30'))col.in30=j;
+    else if(/^ntt cre/.test(n))col.creator=j;
+    else if(n==='no'&&col.no===undefined)col.no=j;});
+  if(col.mo===undefined||col.cable===undefined||col.start===undefined)return null;
+  const cl=v=>String(v==null?'':v).replace(/\s+/g,' ').trim();
+  const rows=[],raw={cable:new Set(),creator:new Set(),type:new Set()};let swapped=0,n=0;
+  const cr=[];
+  for(let i=hr+1;i<aoa.length;i++){
+    const r=aoa[i]||[],cable=cl(r[col.cable]).toUpperCase();
+    if(!cable)continue;
+    const m=monthFromName(r[col.mo]);if(m<0)continue;
+    raw.cable.add(String(r[col.cable]));
+    let st=sbDP(r[col.start]);
+    if(st&&st.mo-1!==m){const s2=sbSw(st);if(s2&&s2.mo-1===m){st=s2;swapped++}}
+    let en='',flag=0;
+    const ep=col.end===undefined?null:sbDP(r[col.end]);
+    if(ep&&st){
+      const c=[ep],s2=sbSw(ep);if(s2)c.push(s2);
+      const s0=sbMs(st);let best=null,bi=0;
+      c.forEach((p,k)=>{const d=sbMs(p)-s0;if(d>=0&&(best===null||d<best)){best=d;bi=k}});
+      if(best===null)flag=1;else{en=sbStr(c[bi]);if(bi===1)swapped++}
+    }else if(ep&&!st)flag=1;
+    const stt=cl(r[col.status]),imp=cl(r[col.impact]),i30=cl(r[col.in30]);
+    const type=cl(r[col.type]);if(type)raw.type.add(type);
+    const creator=cl(r[col.creator]);if(creator){raw.creator.add(creator);cr.push(creator)}
+    n++;
+    rows.push([col.no!==undefined&&r[col.no]!=null?+r[col.no]||n:n,m,cable,type?type[0].toUpperCase()+type.slice(1):'',
+      /closed/i.test(stt)?'Closed':/pend|open/i.test(stt)?'Pending':(stt||'Unknown'),
+      /^non/i.test(imp)?'Non-service affecting':/service/i.test(imp)?'Service affecting':'Not stated',
+      creator,/^y/i.test(i30)?'YES':/^n/i.test(i30)?'NO':'',st?sbStr(st):'',en,flag]);
+  }
+  if(!rows.length)return null;
+  // canonical creator names: merge spacing/case and Mohamad/Mohd
+  const key=s=>s.replace(/\s+/g,'').toLowerCase().replace(/^mohamad/,'mohd');
+  const disp=s=>s.replace(/\s+/g,'').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const votes=new Map();cr.forEach(s=>{const k=key(s),d=disp(s);const v=votes.get(k)||new Map();v.set(d,(v.get(d)||0)+1);votes.set(k,v)});
+  const best=new Map();votes.forEach((v,k)=>best.set(k,[...v.entries()].sort((a,b)=>b[1]-a[1])[0][0]));
+  rows.forEach(r=>{if(r[6])r[6]=best.get(key(r[6]))});
+  const cats=new Set(rows.map(r=>sbCat(r[3])));
+  return{rows,q:{cable:[raw.cable.size,new Set(rows.map(r=>r[2])).size],creator:[raw.creator.size,best.size],type:[raw.type.size,cats.size],swapped}};
+}
+const SB_BK=['Under 6 h','6–24 h','1–3 days','Over 3 days','Closed, no end time','Pending'];
+const SB_IMP=['Service affecting','Non-service affecting','Not stated'];
+const SB_CACHE=new WeakMap();
+function sbRows(){
+  const d=sbData();let r=SB_CACHE.get(d);if(r)return r;
+  r=d.rows.map(a=>{
+    const dur=(a[8]&&a[9])?Math.round((Date.parse(a[9]+':00Z')-Date.parse(a[8]+':00Z'))/60000):-1;
+    const open=a[4]==='Pending';
+    const bk=open?5:dur<0?4:dur<360?0:dur<1440?1:dur<4320?2:3;
+    return{no:a[0],m:a[1],cable:a[2],type:a[3],cat:sbCat(a[3]),status:a[4],impact:a[5],creator:a[6]||'(not recorded)',in30:a[7],start:a[8],end:a[9],flag:a[10],dur,bk,open};
+  });
+  SB_CACHE.set(d,r);return r;
+}
+
+/* ---------- submarine: dashboard ---------- */
+const SF={m:null,cable:new Set(),cat:new Set(),impact:new Set(),status:new Set(),creator:new Set(),bk:new Set()};
+const SK=['cable','cat','impact','status','creator','bk'];
+function sPass(r,skip){
+  if(skip!=='m'&&SF.m!==null&&r.m!==SF.m)return false;
+  for(const k of SK){if(k===skip)continue;const s=SF[k];if(s.size&&!s.has(r[k]))return false}
+  return true;
+}
+const sRows=skip=>sbRows().filter(r=>sPass(r,skip));
+function sCounts(k,skip=k){const m=new Map();for(const r of sRows(skip))m.set(r[k],(m.get(r[k])||0)+1);return m}
+const sActive=()=>SK.reduce((a,k)=>a+SF[k].size,0);
+const fdur=m=>m<0?'–':m<60?m+' min':m<1440?(m/60).toFixed(1)+' h':(m/1440).toFixed(1)+' days';
+const fdate=s=>{if(!s)return '–';const m=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(s);return m?`${+m[3]} ${MN[+m[2]-1]} ${m[1]}`:s};
+const median=a=>{if(!a.length)return null;const b=[...a].sort((x,y)=>x-y),h=b.length>>1;return b.length%2?b[h]:(b[h-1]+b[h])/2};
+function sOpt(k,el){
+  const c=sCounts(k),all=[...new Set(sbRows().map(r=>r[k]))];
+  const items=all.map(n=>({n,v:c.get(n)||0})).sort((a,b)=>b.v-a.v||String(a.n).localeCompare(String(b.n)));
+  $(el).innerHTML=items.map(x=>`<button class="opt${x.v?'':' zero'}" data-sk="${k}" data-sv="${esc(x.n)}" aria-pressed="${SF[k].has(x.n)}"><span class="bx"><svg><use href="#i-tick"/></svg></span><span class="t" title="${esc(x.n)}">${esc(x.n)}</span><span class="c num">${x.v}</span></button>`).join('');
+}
+function sChips(k,el,order){
+  const c=sCounts(k);
+  $(el).innerHTML=order.filter(n=>c.has(n)||SF[k].has(n)||sbRows().some(r=>r[k]===n)).map(n=>`<button class="chip" data-sk="${k}" data-sv="${esc(n)}" aria-pressed="${SF[k].has(n)}">${esc(n)}<span class="c num">${c.get(n)||0}</span></button>`).join('');
+}
+function sBar(k,el,order){
+  const c=sCounts(k);
+  let items=order?order.map((n,i)=>({n:i,l:n,v:c.get(i)||0})):[...c.entries()].map(([n,v])=>({n,l:n,v})).sort((a,b)=>b.v-a.v||String(a.n).localeCompare(String(b.n)));
+  SF[k].forEach(n=>{if(!items.some(x=>x.n===n))items.push({n,l:order?order[n]:n,v:0})});
+  const mx=Math.max(1,...items.map(x=>x.v)),sel=SF[k].size>0,tot=items.reduce((a,x)=>a+x.v,0);
+  $(el).innerHTML=items.map(x=>`<button class="brow${sel&&!SF[k].has(x.n)?' dim':''}" data-sk="${k}" data-sv="${esc(x.n)}" data-tip="${esc(T(x.l,[['NTT',x.v],['Share',tot?pc(x.v/tot):'–']]))}"><span class="l" title="${esc(x.l)}">${esc(x.l)}</span><span class="bar"><i style="width:${x.v/mx*100}%"></i></span><span class="n num">${x.v}</span></button>`).join('')||'<p class="hint">No NTT for this selection.</p>';
+}
+function renderSub(){
+  if(!$('#v-subm'))return;
+  const all=sbRows(),R=sRows(),mons=[...new Set(all.map(r=>r.m))].sort((a,b)=>a-b);
+  if(SF.m!==null&&!mons.includes(SF.m))SF.m=null;
+  const d=sbData(),last=all.reduce((a,r)=>r.start>a?r.start:a,'');
+  $('#sb-meta').textContent=`${fmt(all.length)} NTT · ${mons.length?MN[mons[0]]+'–'+MN[mons[mons.length-1]]:'no data'} 2026${last?' · latest fault '+fdate(last):''}${SBLIVE?' · uploaded '+(SBLIVE.source||'file'):''}`;
+  $('#sb-months').innerHTML=`<button class="chip" data-sm="all" aria-pressed="${SF.m===null}">All months</button>`+mons.map(m=>`<button class="chip" data-sm="${m}" aria-pressed="${SF.m===m}">${MN[m]}</button>`).join('');
+  sOpt('cable','#sb-sl-cable');sOpt('cat','#sb-sl-cat');
+  sChips('impact','#sb-sl-impact',SB_IMP);sChips('status','#sb-sl-status',['Closed','Pending']);
+  $('#sb-fcount').textContent=sActive()+' active';$('#sb-clear').disabled=sActive()===0;
+  // KPIs
+  const t=R.length,sa=R.filter(r=>r.impact==='Service affecting').length,imp=R.filter(r=>r.impact!=='Not stated').length;
+  const pend=R.filter(r=>r.open),y=R.filter(r=>r.in30==='YES').length,nn=R.filter(r=>r.in30==='NO').length;
+  const dd=R.filter(r=>r.status==='Closed'&&r.dur>=0),md=median(dd.map(r=>r.dur)),w24=dd.filter(r=>r.dur<1440).length;
+  let sub1;
+  if(SF.m===null)sub1=`<span><b>${fmt(t/Math.max(1,new Set(R.map(r=>r.m)).size))}</b> a month on average</span>`;
+  else{const prev=all.filter(r=>r.m===SF.m-1&&SK.every(k=>!SF[k].size||SF[k].has(r[k]))).length;
+    sub1=mons.includes(SF.m-1)?`<span class="${t>prev?'up':t<prev?'dn':''}"><b>${t>prev?'▲':t<prev?'▼':'■'} ${Math.abs(t-prev)}</b></span><span>vs ${MN[SF.m-1]} (${prev})</span>`:'<span>First month in the data</span>'}
+  const oldest=pend.length?pend.reduce((a,r)=>r.start&&(!a||r.start<a)?r.start:a,''):'';
+  const K=[
+    {k:'Total NTT',v:fmt(t),s:sub1,i:'i-list'},
+    {k:'Service affecting',v:fmt(sa),s:imp?`<span><b>${pc(sa/imp)}</b> of ${fmt(imp)} with impact stated</span>`:'',i:'i-fiber'},
+    {k:'Pending NTT',v:fmt(pend.length),s:oldest?`<span>oldest started <b>${fdate(oldest)}</b></span>`:'<span>none open</span>',i:'i-code'},
+    {k:'NTT created within 30 min',v:(y+nn)?(y/(y+nn)*100).toFixed(1)+'<small>%</small>':'–',s:`<span><b>${fmt(y)}</b> of ${fmt(y+nn)} recorded</span>`,i:'i-chip'},
+    {k:'Median restoration time',v:md===null?'–':fdur(Math.round(md)).replace(/ (h|days|min)$/,'<small> $1</small>'),s:dd.length?`<span><b>${pc(w24/dd.length,0)}</b> within 24 h · ${fmt(dd.length)} closed</span>`:'',i:'i-clock'}
+  ];
+  $('#sb-kpis').innerHTML=K.map(x=>`<div class="card kpi"><div class="top"><span class="k">${x.k}</span><span class="ico"><svg><use href="#${x.i}"/></svg></span></div><div class="v num">${x.v}</div><div class="s">${x.s}</div></div>`).join('');
+  // insights
+  const ins=[];
+  if(t){
+    const cc=[...sCounts('cat').entries()].sort((a,b)=>b[1]-a[1])[0];
+    if(cc)ins.push(`<b>${esc(cc[0])}</b> is the largest fault category: ${fmt(cc[1])} NTT, ${pc(cc[1]/t,0)} of the selection.`);
+    const cb=[...sCounts('cable').entries()].sort((a,b)=>b[1]-a[1]).slice(0,3);
+    if(cb.length>1)ins.push(`<b>${cb.map(x=>esc(x[0])).join(', ')}</b> together account for ${pc(cb.reduce((a,x)=>a+x[1],0)/t,0)} of NTT.`);
+    ins.push(pend.length?`<b>${fmt(pend.length)} NTT</b> are still pending${oldest?`, the oldest started ${fdate(oldest)}`:''}.`:'No NTT are pending in this selection.');
+  }
+  $('#sb-ins').innerHTML=ins.length?`<div class="sbins">${ins.map(x=>`<div><i></i><span>${x}</span></div>`).join('')}</div>`:'';
+  $('#sb-ins').hidden=!ins.length;
+  // trend (stacked by impact)
+  const mf=Array.from({length:12},()=>[0,0,0]);
+  for(const r of sRows('m'))mf[r.m][SB_IMP.indexOf(r.impact)]++;
+  const mx=Math.max(1,...mons.map(m=>mf[m][0]+mf[m][1]+mf[m][2]));
+  $('#sb-trend').innerHTML=mons.map(m=>{
+    const [a,b,c]=mf[m],tt=a+b+c,dim=SF.m!==null&&SF.m!==m,h=x=>(x/mx*140).toFixed(1);
+    return `<button class="tb${dim?' dim':''}" data-sm="${m}" data-tip="${esc(T(MN[m]+' 2026',[['Service affecting',a],['Non-service affecting',b],['Not stated',c],['Total',tt]]))}" aria-label="${MN[m]} ${tt}"><span class="v num">${tt}</span><span class="sbstk" style="height:${Math.max(2,tt/mx*140).toFixed(1)}px"><i style="height:${h(c)}px;background:var(--line)"></i><i style="height:${h(a)}px;background:var(--mark2)"></i><i style="height:${h(b)}px;background:var(--mark)"></i></span><span class="m">${MN[m]}</span></button>`;
+  }).join('');
+  sBar('cable','#sb-cable');sBar('cat','#sb-cat');sBar('creator','#sb-creator');sBar('bk','#sb-bk',SB_BK);
+  // impact donut
+  const ci=sCounts('impact'),vals=SB_IMP.map(n=>ci.get(n)||0),tot=vals.reduce((a,b)=>a+b,0),Rr=54,C=2*Math.PI*Rr,selI=SF.impact.size>0,cols=['var(--mark2)','var(--mark)','var(--muted)'];
+  let off=0;
+  const segs=SB_IMP.map((n,i)=>{const len=tot?vals[i]/tot*C:0,s=`<circle class="seg${selI&&!SF.impact.has(n)?' dim':''}" data-sk="impact" data-sv="${esc(n)}" cx="80" cy="80" r="${Rr}" fill="none" stroke="${cols[i]}" stroke-width="22" stroke-dasharray="${Math.max(0,len-2)} ${C-Math.max(0,len-2)}" stroke-dashoffset="${-off}" transform="rotate(-90 80 80)" data-tip="${esc(T(n,[['NTT',vals[i]],['Share',tot?pc(vals[i]/tot,1):'–']]))}"/>`;off+=len;return s}).join('');
+  $('#sb-imp').innerHTML=`<svg viewBox="0 0 160 160" role="img" aria-label="NTT by impact"><circle cx="80" cy="80" r="${Rr}" fill="none" stroke="var(--track)" stroke-width="22"/>${segs}<text x="80" y="82" text-anchor="middle" font-size="26" font-weight="700" fill="var(--ink)">${tot?(vals[0]/tot*100).toFixed(0)+'%':'–'}</text><text x="80" y="100" text-anchor="middle" font-size="9.5" fill="var(--muted)">service affecting</text></svg><div class="legend">${SB_IMP.map((n,i)=>`<button class="leg${selI&&!SF.impact.has(n)?' dim':''}" data-sk="impact" data-sv="${esc(n)}"><i style="background:${cols[i]}"></i><span class="t">${n}</span><b class="num">${vals[i]}</b><span class="p num">${tot?pc(vals[i]/tot,1):''}</span></button>`).join('')}</div>`;
+  // heatmap cable x month
+  const hr=sRows('cable');const hm=new Map();let hmx=1;
+  const hrows=sbRows().filter(r=>SK.every(k=>k==='cable'||!SF[k].size||SF[k].has(r[k])));
+  for(const r of hrows){const key=r.cable+'|'+r.m;hm.set(key,(hm.get(key)||0)+1)}
+  const cabs=[...new Set(sbRows().map(r=>r.cable))].map(c=>({c,t:hrows.filter(r=>r.cable===c).length})).sort((a,b)=>b.t-a.t||a.c.localeCompare(b.c));
+  hm.forEach(v=>{if(v>hmx)hmx=v});
+  const selC=SF.cable.size>0;
+  $('#sb-hm').innerHTML=`<div class="sbhm" style="grid-template-columns:84px repeat(${mons.length},minmax(30px,1fr)) 44px"><span></span>${mons.map(m=>`<button class="hh${SF.m===m?' on':''}" data-sm="${m}">${MN[m]}</button>`).join('')}<span class="hh r">Total</span>`+
+   cabs.map(x=>`<button class="hl${selC&&!SF.cable.has(x.c)?' dim':''}" data-sk="cable" data-sv="${esc(x.c)}">${esc(x.c)}</button>`+mons.map(m=>{const v=hm.get(x.c+'|'+m)||0,p=v?12+v/hmx*78:0;return `<span class="hc${selC&&!SF.cable.has(x.c)?' dim':''}${SF.m!==null&&SF.m!==m?' dim':''}" style="${v?`background:color-mix(in srgb,var(--mark) ${p.toFixed(0)}%,var(--surface));color:${p>52?'var(--on-accent)':'var(--ink)'}`:''}" ${v?`data-tip="${esc(T(x.c+' · '+MN[m],[['NTT',v]]))}"`:''}>${v||''}</span>`}).join('')+`<span class="hh r num">${x.t}</span>`).join('')+`</div>`;
+  // pending table
+  const P=sRows('status').filter(r=>r.open).sort((a,b)=>(a.start||'~').localeCompare(b.start||'~'));
+  const now=Date.now();
+  $('#sb-open').innerHTML=P.length?`<div class="tw"><table><thead><tr><th>No</th><th>Cable</th><th>Fault type</th><th>Impact</th><th>Started</th><th class="r">Age</th></tr></thead><tbody>${P.map(r=>{const ag=r.start?Math.max(0,Math.floor((now-Date.parse(r.start+':00+08:00'))/864e5)):null;return `<tr style="cursor:default"><td class="num">${r.no}</td><td>${esc(r.cable)}</td><td>${esc(r.type||'—')}</td><td>${esc(r.impact)}</td><td>${fdate(r.start)}</td><td class="r num">${ag===null?'–':ag+' d'}</td></tr>`}).join('')}</tbody></table></div>`:'<p class="hint">No pending NTT for this selection.</p>';
+  $('#sb-opn').textContent=P.length+' NTT';
+  // data notes
+  const cl=all.filter(r=>r.status==='Closed'),noEnd=cl.filter(r=>!r.end),bad=all.filter(r=>r.flag===1),noImp=all.filter(r=>r.impact==='Not stated').length,no30=all.filter(r=>!r.in30).length,noTy=all.filter(r=>!r.type).length;
+  const topNo=(()=>{const m=new Map();noEnd.forEach(r=>m.set(r.cable,(m.get(r.cable)||0)+1));const e=[...m.entries()].sort((a,b)=>b[1]-a[1])[0];return e&&noEnd.length?` (${e[0]}: ${e[1]})`:''})();
+  const q=d.q||{},N=[];
+  if(noEnd.length)N.push(['warn',`<b>${noEnd.length}</b> closed NTT have no fault end time${topNo}. They count in totals but not in restoration time.`]);
+  if(bad.length)N.push(['warn',`<b>${bad.length}</b> NTT have an end time earlier than the start time. The end time was ignored.`]);
+  if(noImp)N.push(['info',`<b>${noImp}</b> NTT have no impact recorded (“Not stated”).`]);
+  if(no30||noTy)N.push(['info',`${no30?`<b>${no30}</b> without the 30-minute creation flag`:''}${no30&&noTy?' · ':''}${noTy?`<b>${noTy}</b> without a fault type`:''}.`]);
+  if(q.cable)N.push(['info',`Cleaned for consistency: cable names ${q.cable[0]} → ${q.cable[1]}, creator names ${q.creator[0]} → ${q.creator[1]} (Mohamad/Mohd Juhairi treated as one person), fault types grouped into ${q.type[1]} categories.`]);
+  if(q.swapped)N.push(['info',`Dates arrived in mixed formats. ${q.swapped} had day and month swapped and were matched to the Month column.`]);
+  $('#sb-notes').innerHTML=N.map(([t,m])=>`<div><span class="bdg ${t==='warn'?'c-warn':'c-info'}">${t==='warn'?'Check':'Note'}</span><span>${m}</span></div>`).join('')||'<p class="hint">No data issues found.</p>';
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-sk]');
+  if(b&&b.dataset.sv!==undefined){const k=b.dataset.sk,v=k==='bk'?+b.dataset.sv:b.dataset.sv,s=SF[k];s.has(v)?s.delete(v):s.add(v);renderSub();return}
+  const m=e.target.closest('[data-sm]');
+  if(m){const v=m.dataset.sm==='all'?null:+m.dataset.sm;SF.m=(v!==null&&SF.m===v)?null:v;renderSub()}
+});
+$('#sb-clear').addEventListener('click',()=>{SK.forEach(k=>SF[k].clear());renderSub()});
+$('#sb-rtog').addEventListener('click',()=>{const r=$('#sb-rail');const o=r.classList.toggle('open');$('#sb-rtog').textContent=o?'Hide':'Show';$('#sb-rtog').setAttribute('aria-expanded',o)});
 
 /* ---------- fault rate ---------- */
 let FRLIVE=null;const FRBASE={"rows":[{"k":"ALL","t":0.0042,"v":[0.0017631196847127152,0.001451980916822236,0.0016594067620825555,0.0012445550715619166,0.0022816842978635138,0.0026965359883841526,0.0035262393694254304,0.0015556938394523958,null,null,null,null]},{"k":"DWDM","t":0.007,"v":[0.0044742729306487695,0.004154682007031001,0.0044742729306487695,0.003515500159795462,0.006711409395973154,0.00798977309044423,0.009268136784915308,0.0044742729306487695,null,null,null,null]},{"k":"SDH","t":0.001,"v":[0.000177210703526493,0.000354421407052986,0,0.000177210703526493,0,0.000354421407052986,0.000886053517632465,0,null,null,null,null]},{"k":"MW","t":0.01,"v":[0.0029154518950437317,0,0,0,0.0014577259475218659,0,0,0.0014577259475218659,null,null,null,null]},{"k":"PTN","t":0.0058,"v":[0,0,0.005434782608695652,0,0,0,0,0,null,null,null,null]}]};
@@ -1030,6 +1307,19 @@ function frUI(){
   const mo=[];for(let m=0;m<12;m++)if(f.rows.some(r=>r.v[m]!==null))mo.push(MN[m]);
   const st=f.same?'<span class="bdg c-mute">No change</span>':'<span class="bdg c-warn">Changed</span>';
   return `<div class="frrow"><input type="checkbox" id="fr-inc" aria-label="Include fault rate" ${ADM.frInc?'checked':''}><div><b>Fault rate</b> from sheet “${esc(f.sheet)}” · ${esc(f.rows.map(r=>r.k).join(', '))} · ${mo.length?esc(mo[0]+'–'+mo[mo.length-1]):'no months'}</div>${st}</div>`;
+}
+function sbUI(){
+  const f=ADM.sb;if(!f)return '';
+  const st=f.same?'<span class="bdg c-mute">No change</span>':'<span class="bdg c-warn">Changed</span>';
+  const mo=[...new Set(f.rows.map(r=>r[1]))].sort((a,b)=>a-b);
+  return `<div class="frrow"><input type="checkbox" id="sb-inc" aria-label="Include submarine data" ${ADM.sbInc?'checked':''}><div><b>Submarine NTT</b> from sheet “${esc(f.sheet)}” · ${fmt(f.rows.length)} NTT · ${mo.length?esc(MN[mo[0]]+'–'+MN[mo[mo.length-1]]):'no months'}</div>${st}</div>`;
+}
+function sbRow(){
+  const L=SBLIVE;
+  const tag=L?'<span class="bdg c-warn">Uploaded</span>':'<span class="bdg c-info">Original</span>';
+  const det=L?`<b>${esc(L.source||'file')}</b> · ${esc(fmtAt(L.at))}<br>by ${esc(nameOf(L.by))}`:'From SubmarineNTT_v11.xlsx';
+  const act=L&&ADM.can?'<button class="btn ghost sm" data-rvsb="1" type="button">Revert</button>':'';
+  return `<div class="mrow" style="grid-template-columns:minmax(0,1fr) auto;border-top:1.5px solid var(--line);margin-top:4px"><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Submarine</b>${tag}<span class="num" style="font-size:12.5px">${fmt(sbData().rows.length)} NTT</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
 }
 function frRow(){
   const L=FRLIVE;
@@ -1102,7 +1392,7 @@ function analyseSheet(name,aoa){
   return S;
 }
 async function loadFile(f){
-  ADM.file=f;ADM.sheets=[];ADM.cur=0;ADM.fr=null;ADM.frInc=false;$('#a-res').innerHTML='';
+  ADM.file=f;ADM.sheets=[];ADM.cur=0;ADM.fr=null;ADM.frInc=false;ADM.sb=null;ADM.sbInc=false;$('#a-res').innerHTML='';
   const fn=$('#fname');fn.hidden=false;fn.innerHTML=`<span>Reading <b>${esc(f.name)}</b>…</span>`;
   try{
     if(f.size>20*1024*1024)throw new Error('File is larger than 20 MB. Split it by month first.');
@@ -1115,14 +1405,16 @@ async function loadFile(f){
       if(/\.csv$/i.test(f.name)&&S.ok){const m=monthFromName(f.name);if(m>=0){S.month=m;S.include=true}}
       ADM.sheets.push(S);
       if(!ADM.fr&&!/\.csv$/i.test(f.name)){const fr=parseFR(aoa);if(fr)ADM.fr={rows:fr,sheet:n}}
+      if(!ADM.sb&&!/\.csv$/i.test(f.name)){const sb=parseSub(aoa);if(sb)ADM.sb={rows:sb.rows,q:sb.q,sheet:n}}
     }
     if(!ADM.sheets.length)throw new Error('The file has no sheets.');
     if(ADM.fr){ADM.fr.same=JSON.stringify(frData().rows)===JSON.stringify(ADM.fr.rows);ADM.frInc=!ADM.fr.same}
+    if(ADM.sb){ADM.sb.same=JSON.stringify(sbData().rows)===JSON.stringify(ADM.sb.rows);ADM.sbInc=!ADM.sb.same}
     ADM.sheets.forEach(s=>{compare(s);s.include=s.ok&&s.month>=0&&s.cmp!=='same'});
     ADM.cur=Math.max(0,ADM.sheets.findIndex(s=>s.ok&&s.cmp!=='same'));if(ADM.cur<0)ADM.cur=Math.max(0,ADM.sheets.findIndex(s=>s.ok));
     fn.innerHTML=`<span><b>${esc(f.name)}</b> · ${(f.size/1024).toFixed(0)} KB · ${ADM.sheets.length} sheet${ADM.sheets.length>1?'s':''}, ${ADM.sheets.filter(s=>s.ok).length} with ticket data</span><button class="btn ghost sm" id="reset" type="button">Choose another file</button>`;
   }catch(e){
-    ADM.file=null;ADM.sheets=[];ADM.fr=null;
+    ADM.file=null;ADM.sheets=[];ADM.fr=null;ADM.sb=null;
     fn.innerHTML=`<span class="bdg c-bad">Could not read file</span><span>${esc(e.message||e)}</span>`;
   }
   renderAdmin();
@@ -1165,12 +1457,12 @@ function renderAdmin(){
     else{tag='<span class="bdg c-mute">No data</span>';det='Not reported yet'}
     const act=live&&ADM.can?`<button class="btn ghost sm" data-rv="${i}" type="button">${BASE_RAW[i].length?'Revert':'Remove'}</button>`:'';
     return`<div class="mrow"><span class="m">${m}</span><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tag}<span class="num" style="font-size:12.5px">${n?fmt(n)+' NTT':''}</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
-  }).join('')+frRow();
+  }).join('')+frRow()+sbRow();
   // history
   const H=$('#a-hist');
   if(!ADM.can)$('#a-histc').hidden=true;else{
     $('#a-histc').hidden=false;
-    H.innerHTML=ADM.hist.length?ADM.hist.slice(0,8).map(h=>`<div><b>${h.kind==='revert'?'Reverted':'Published'} ${esc([...(h.months||[]).map(x=>MN[x]),...(h.fr?['fault rate']:[])].join(', '))}</b>${h.file?' · '+esc(h.file):''}<small>${esc(fmtAt(h.at))} · ${esc(nameOf(h.by))}</small></div>`).join(''):'<p class="empty">No uploads yet.</p>';
+    H.innerHTML=ADM.hist.length?ADM.hist.slice(0,8).map(h=>`<div><b>${h.kind==='revert'?'Reverted':'Published'} ${esc([...(h.months||[]).map(x=>MN[x]),...(h.fr?['fault rate']:[]),...(h.sb?['submarine']:[])].join(', '))}</b>${h.file?' · '+esc(h.file):''}<small>${esc(fmtAt(h.at))} · ${esc(nameOf(h.by))}</small></div>`).join(''):'<p class="empty">No uploads yet.</p>';
   }
   // sheets
   const sh=$('#a-sheets');
@@ -1179,7 +1471,7 @@ function renderAdmin(){
   sh.innerHTML=`<div class="tw" style="max-height:none"><table class="sheets"><thead><tr><th style="width:34px"></th><th>Sheet</th><th>Month</th><th style="text-align:right">Tickets</th><th>Status</th></tr></thead><tbody>`+ADM.sheets.map((s,i)=>{
     const st=!s.ok?`<span class="bdg c-mute">Skipped</span>`:s.cmp==='same'&&!s.include?`<span class="bdg c-mute">No change</span>`:s.month<0?`<span class="bdg c-warn">Pick a month</span>`:clash.has(s.month)&&s.include?`<span class="bdg c-bad">Month clash</span>`:s.cmp==='chg'?`<span class="bdg c-warn">Changed</span>`:s.issues.some(x=>x.t==='warn')?`<span class="bdg c-warn">Check</span>`:`<span class="bdg c-good">${s.cmp==='new'?'New':'Ready'}</span>`;
     const opts=`<option value="-1">–</option>`+MN.map((m,j)=>`<option value="${j}"${s.month===j?' selected':''}>${m}</option>`).join('');
-    return`<tr data-s="${i}" class="${i===ADM.cur?'cur':''}"><td><input type="checkbox" data-inc="${i}" aria-label="Include ${esc(s.name)}" ${s.include?'checked':''} ${s.ok?'':'disabled'}></td><td>${esc(s.name)}${s.note?`<div class="d" style="font-size:11px;color:var(--muted)">${esc(s.note)}</div>`:''}</td><td>${s.ok?`<select data-mo="${i}" aria-label="Month for ${esc(s.name)}">${opts}</select>`:'–'}</td><td class="num" style="text-align:right">${s.ok?(s.cmp==='chg'?fmt(s.prev)+' → ':'')+fmt(s.total):'–'}</td><td>${st}</td></tr>`}).join('')+`</tbody></table></div>`+frUI();
+    return`<tr data-s="${i}" class="${i===ADM.cur?'cur':''}"><td><input type="checkbox" data-inc="${i}" aria-label="Include ${esc(s.name)}" ${s.include?'checked':''} ${s.ok?'':'disabled'}></td><td>${esc(s.name)}${s.note?`<div class="d" style="font-size:11px;color:var(--muted)">${esc(s.note)}</div>`:''}</td><td>${s.ok?`<select data-mo="${i}" aria-label="Month for ${esc(s.name)}">${opts}</select>`:'–'}</td><td class="num" style="text-align:right">${s.ok?(s.cmp==='chg'?fmt(s.prev)+' → ':'')+fmt(s.total):'–'}</td><td>${st}</td></tr>`}).join('')+`</tbody></table></div>`+frUI()+sbUI();
   // preview
   const S=ADM.sheets[ADM.cur],P=$('#a-preview');
   if(!S||!S.ok){P.innerHTML=`<p class="empty">${S&&S.issues.length?S.issues.map(x=>x.m).join(' '):'Select a sheet with ticket data to preview it.'}</p>`}
@@ -1189,10 +1481,10 @@ function renderAdmin(){
       (S.issues.length?`<div class="iss">`+S.issues.map(x=>`<div><span class="bdg ${x.t==='bad'?'c-bad':x.t==='warn'?'c-warn':'c-info'}">${x.t==='bad'?'Error':x.t==='warn'?'Check':'Note'}</span><span>${x.m}</span></div>`).join('')+`</div>`:'<div class="iss"><div><span class="bdg c-good">Clean</span><span>No problems found in this sheet.</span></div></div>');
   }
   // summary
-  const pl=plan(),tot=pl.reduce((a,s)=>a+s.total,0),frSel=!!(ADM.fr&&ADM.frInc);
-  let msg=ADM.sheets.some(s=>s.ok&&s.cmp==='same')&&!pl.length&&!frSel?'Everything in this file is already on the dashboard. Nothing to publish.':'Nothing selected.',can=false;
+  const pl=plan(),tot=pl.reduce((a,s)=>a+s.total,0),frSel=!!(ADM.fr&&ADM.frInc),sbSel=!!(ADM.sb&&ADM.sbInc);
+  let msg=ADM.sheets.some(s=>s.ok&&s.cmp==='same')&&!pl.length&&!frSel&&!sbSel?'Everything in this file is already on the dashboard. Nothing to publish.':'Nothing selected.',can=false;
   if(clash.size)msg=`Two selected sheets use ${[...clash].map(i=>MN[i]).join(', ')}. Give each sheet its own month.`;
-  else if(pl.length||frSel){can=ADM.can&&ADM.dbOk&&!ADM.busy;msg=(pl.length?`<b>${pl.length} month${pl.length>1?'s':''}</b> (${pl.map(s=>MN[s.month]).join(', ')}) · <b>${fmt(tot)}</b> tickets. Only these months are written; the rest stay as they are.`:'')+(frSel?(pl.length?' ':'')+'<b>Fault rate</b> table will be updated.':'')}
+  else if(pl.length||frSel||sbSel){can=ADM.can&&ADM.dbOk&&!ADM.busy;msg=(pl.length?`<b>${pl.length} month${pl.length>1?'s':''}</b> (${pl.map(s=>MN[s.month]).join(', ')}) · <b>${fmt(tot)}</b> tickets. Only these months are written; the rest stay as they are.`:'')+(frSel?(pl.length?' ':'')+'<b>Fault rate</b> table will be updated.':'')+(sbSel?((pl.length||frSel)?' ':'')+`<b>Submarine</b> data (${fmt(ADM.sb.rows.length)} NTT) will be replaced.`:'')}
   const sm=$('#a-sum');sm.innerHTML=msg;
   $('#publish').disabled=!can;
   if(ADM.can&&!ADM.dbOk)sm.innerHTML+=' <span class="wait">Shared storage is not available in this view.</span>';
@@ -1202,9 +1494,9 @@ $('#drop').addEventListener('dragleave',()=>$('#drop').classList.remove('over'))
 $('#drop').addEventListener('drop',e=>{e.preventDefault();$('#drop').classList.remove('over');const f=e.dataTransfer.files[0];if(f&&ADM.can)loadFile(f)});
 $('#browse').addEventListener('click',()=>$('#file').click());
 $('#file').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)loadFile(f)});
-$('#fname').addEventListener('click',e=>{if(e.target.closest('#reset')){ADM.file=null;ADM.sheets=[];ADM.fr=null;$('#fname').hidden=true;$('#a-res').innerHTML='';renderAdmin()}});
+$('#fname').addEventListener('click',e=>{if(e.target.closest('#reset')){ADM.file=null;ADM.sheets=[];ADM.fr=null;ADM.sb=null;$('#fname').hidden=true;$('#a-res').innerHTML='';renderAdmin()}});
 $('#a-sheets').addEventListener('click',e=>{const tr=e.target.closest('tr[data-s]');if(!tr||e.target.closest('input,select'))return;ADM.cur=+tr.dataset.s;renderAdmin()});
-$('#a-sheets').addEventListener('change',e=>{if(e.target.id==='fr-inc'){ADM.frInc=e.target.checked;$('#a-res').innerHTML='';renderAdmin();return}
+$('#a-sheets').addEventListener('change',e=>{if(e.target.id==='sb-inc'){ADM.sbInc=e.target.checked;$('#a-res').innerHTML='';renderAdmin();return}if(e.target.id==='fr-inc'){ADM.frInc=e.target.checked;$('#a-res').innerHTML='';renderAdmin();return}
   
   const i=e.target.dataset.inc,j=e.target.dataset.mo;
   if(i!==undefined){ADM.sheets[+i].include=e.target.checked}
@@ -1235,13 +1527,16 @@ async function doPublish(){
   }
   let frDone=false,frFail=null;
   if(ADM.fr&&ADM.frInc){try{const doc={rows:ADM.fr.rows,sheet:String(ADM.fr.sheet).slice(0,60),source:ADM.file.name.slice(0,120),by:ADM.me||null,at:new Date().toISOString()};await ADM.db.doc('ntt/faultrate').set(doc);FRLIVE=doc;frDone=true;ADM.fr.same=true;ADM.frInc=false}catch(e){frFail=e}}
+  let sbDone=false,sbFail=null;
+  if(ADM.sb&&ADM.sbInc){try{const doc={rows:ADM.sb.rows,q:ADM.sb.q,sheet:String(ADM.sb.sheet).slice(0,60),source:ADM.file.name.slice(0,120),by:ADM.me||null,at:new Date().toISOString()};if(JSON.stringify(doc).length>900000)throw new Error('too large');await ADM.db.doc('ntt/submarine').set(doc);SBLIVE=doc;sbDone=true;ADM.sb.same=true;ADM.sbInc=false}catch(e){sbFail=e}}
   ADM.busy=false;
-  if(done.length||frDone){buildData();render();
-    await log({kind:'publish',at:new Date().toISOString(),by:ADM.me||null,file:ADM.file.name.slice(0,120),months:done.map(s=>s.month),counts:done.map(s=>s.total),fr:frDone});
+  if(done.length||frDone||sbDone){buildData();render();
+    await log({kind:'publish',at:new Date().toISOString(),by:ADM.me||null,file:ADM.file.name.slice(0,120),months:done.map(s=>s.month),counts:done.map(s=>s.total),fr:frDone,sb:sbDone});
     loadHist()}
   if(fail.length)res('bad',`<b>${done.length?'Partly published.':'Not published.'}</b> ${fail.map(([s,e])=>`${MN[s.month]}: ${e&&e.message==='too large'?'sheet is too large for one month':e&&e.code==='permission_denied'?'you do not have permission to write data':'the save failed, try again'}`).join('; ')}.`);
   else if(frFail)res('bad','<b>Fault rate was not saved.</b> Try again.');
-  else res('good',`<b>Published.</b> ${[...done.map(s=>MN[s.month]+' ('+fmt(s.total)+')'),...(frDone?['fault rate']:[])].join(', ')} ${done.length+(frDone?1:0)>1?"are":"is"} now live on the dashboard. <button class="btn ghost sm" id="godash" type="button">View dashboard</button>`);
+  else if(sbFail)res('bad','<b>Submarine data was not saved.</b> '+(sbFail.message==='too large'?'The sheet is too large.':'Try again.'));
+  else res('good',`<b>Published.</b> ${[...done.map(s=>MN[s.month]+' ('+fmt(s.total)+')'),...(frDone?['fault rate']:[]),...(sbDone?['submarine ('+fmt(SBLIVE.rows.length)+')']:[])].join(', ')} ${done.length+(frDone?1:0)+(sbDone?1:0)>1?"are":"is"} now live on the dashboard. <button class="btn ghost sm" id="godash" type="button">View dashboard</button>`);
   ADM.sheets.forEach(s=>{compare(s);if(s.cmp==='same')s.include=false});
   renderAdmin();
 }
@@ -1266,6 +1561,15 @@ $('#a-months').addEventListener('click',async e=>{
   renderAdmin();
 });
 $('#a-months').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-rvsb]');if(!b||!ADM.can||!ADM.db)return;
+  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Revert'}},4000);return}
+  b.disabled=true;
+  try{await ADM.db.doc('ntt/submarine').delete();SBLIVE=null;render();
+    await log({kind:'revert',at:new Date().toISOString(),by:ADM.me||null,months:[],sb:true});loadHist();
+  }catch(err){b.disabled=false;b.textContent='Failed';}
+  renderAdmin();
+});
+$('#a-months').addEventListener('click',async e=>{
   const b=e.target.closest('[data-rvfr]');if(!b||!ADM.can||!ADM.db)return;
   if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Revert'}},4000);return}
   b.disabled=true;
@@ -1275,7 +1579,7 @@ $('#a-months').addEventListener('click',async e=>{
   renderAdmin();
 });
 async function resolveNames(){
-  const ids=new Set();Object.values(LIVE).forEach(d=>d.by&&ids.add(d.by));if(FRLIVE&&FRLIVE.by)ids.add(FRLIVE.by);ADM.hist.forEach(h=>h.by&&ids.add(h.by));if(ADM.me)ids.add(ADM.me);
+  const ids=new Set();Object.values(LIVE).forEach(d=>d.by&&ids.add(d.by));if(FRLIVE&&FRLIVE.by)ids.add(FRLIVE.by);if(SBLIVE&&SBLIVE.by)ids.add(SBLIVE.by);ADM.hist.forEach(h=>h.by&&ids.add(h.by));if(ADM.me)ids.add(ADM.me);
   const list=[...ids].filter(x=>!(x in ADM.names));if(!list.length||!ADM.user)return;
   try{const ps=await ADM.user.profiles(list);for(const k in ps)ADM.names[k]=ps[k].name||'a team member';renderAdmin()}catch(e){}
 }

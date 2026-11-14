@@ -13,7 +13,7 @@ Share it on the LAN with `http://<this-mac-ip>:8080`. Every browser that opens t
 address reads and writes the same store, so an upload is the latest data for everyone.
 
 - **Store:** `data/ntt.json` — one doc per month (`ntt/m01`…`ntt/m12`), plus
-  `ntt/faultrate`, `meta/seed` and the `uploads/` log. Written atomically.
+  `ntt/faultrate`, `ntt/submarine` (Submarine tab data), `meta/seed` and the `uploads/` log. Written atomically.
 - **Backup / history:** `git add data/` (or copy the folder). No cloud, no auth —
   anyone who can reach the port can publish, so run it on a trusted machine.
 - **Reset to baked baseline:** stop the server, `rm -rf data/`, start again. First
