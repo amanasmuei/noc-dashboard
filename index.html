@@ -4,28 +4,28 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&family=Roboto+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: brand header band, month tabs, left slicer rail, KPI row, then three rows of visuals on a light canvas. Palette follows TM Global: Cobalt for data, Dark Blue for chrome and text, Accent Orange for the single contrast series. */
+/* Layout: brand header band, month tabs, left slicer rail, KPI row, then three rows of visuals on a light canvas. Palette is teal: deep teal for data, near-black teal for chrome and text, Accent Orange for the single contrast series. */
 :root{
-  --canvas:#f2f3fa; --surface:#ffffff; --line:#e1e3f2; --track:#eceef9; --hover:#f6f7fd;
-  --ink:#06013a; --ink2:#403d6b; --muted:#6b6993;
-  --head:#06013a; --head-ink:#ffffff; --head-mute:#b5b2e6;
-  --brand:#1800e7; --navy:#180092; --orange:#ff5e00; --sel:#eceaff;
-  --mark:#1800e7; --mark2:#ff5e00; --accent:#1800e7; --on-accent:#ffffff; --accent-ink:#1800e7;
+  --canvas:#f1f5f6; --surface:#ffffff; --line:#dde8ea; --track:#e8f0f1; --hover:#f4f9f9;
+  --ink:#04262c; --ink2:#31535a; --muted:#527079;
+  --head:#043138; --head-ink:#ffffff; --head-mute:#a9ced4;
+  --brand:#037386; --navy:#02505c; --orange:#ff5e00; --sel:#dceef1;
+  --mark:#037386; --mark2:#ff5e00; --accent:#037386; --on-accent:#ffffff; --accent-ink:#026875;
   --good:#0ca30c; --warn:#fab219; --bad:#d82e00;
-  --shadow:0 1px 2px rgba(6,1,58,.05),0 4px 14px rgba(6,1,58,.05);
+  --shadow:0 1px 2px rgba(4,38,44,.05),0 4px 14px rgba(4,38,44,.05);
   --font:'Roboto','Segoe UI',system-ui,-apple-system,Arial,sans-serif;
   --mono:'Roboto Mono',ui-monospace,Menlo,Consolas,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --canvas:#06013a; --surface:#0e0849; --line:#241c78; --track:#1a1362; --hover:#140d58;
-  --ink:#f2f1ff; --ink2:#c9c6f2; --muted:#9a96d4;
-  --head:#0e0849; --head-ink:#ffffff; --head-mute:#a9a5e2; --sel:#1f1780;
-  --mark:#7f75ff; --mark2:#ff7a00; --accent:#7f75ff; --on-accent:#06013a; --accent-ink:#b7b2ff; --shadow:none; color-scheme:dark;}}
+  --canvas:#04222a; --surface:#062c35; --line:#0f4753; --track:#0a3a45; --hover:#08323c;
+  --ink:#e9f8fa; --ink2:#b3d8dd; --muted:#84aeb5;
+  --head:#062c35; --head-ink:#ffffff; --head-mute:#8dbcc2; --sel:#0b4552;
+  --mark:#3fc6d4; --mark2:#ff8a3d; --accent:#3fc6d4; --on-accent:#04222a; --accent-ink:#7fdee8; --shadow:none; color-scheme:dark;}}
 :root[data-theme="dark"]{
-  --canvas:#06013a; --surface:#0e0849; --line:#241c78; --track:#1a1362; --hover:#140d58;
-  --ink:#f2f1ff; --ink2:#c9c6f2; --muted:#9a96d4;
-  --head:#0e0849; --head-ink:#ffffff; --head-mute:#a9a5e2; --sel:#1f1780;
-  --mark:#7f75ff; --mark2:#ff7a00; --accent:#7f75ff; --on-accent:#06013a; --accent-ink:#b7b2ff; --shadow:none; color-scheme:dark;}
+  --canvas:#04222a; --surface:#062c35; --line:#0f4753; --track:#0a3a45; --hover:#08323c;
+  --ink:#e9f8fa; --ink2:#b3d8dd; --muted:#84aeb5;
+  --head:#062c35; --head-ink:#ffffff; --head-mute:#8dbcc2; --sel:#0b4552;
+  --mark:#3fc6d4; --mark2:#ff8a3d; --accent:#3fc6d4; --on-accent:#04222a; --accent-ink:#7fdee8; --shadow:none; color-scheme:dark;}
 
 *{box-sizing:border-box}
 body{background:var(--canvas);color:var(--ink);font-family:var(--font);font-size:13px;line-height:1.45;-webkit-font-smoothing:antialiased}
@@ -44,7 +44,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;paddin
 .months button[aria-pressed="true"]{background:var(--accent-ink-h,#fff);color:var(--head);font-weight:700}
 .months button:disabled{opacity:.35;cursor:default}
 .hd-r{display:flex;align-items:center;gap:10px}
-.pill{font:500 12px var(--mono);letter-spacing:.06em;padding:6px 11px;border-radius:999px;background:var(--orange);color:#06013a;font-weight:700;white-space:nowrap}
+.pill{font:500 12px var(--mono);letter-spacing:.06em;padding:6px 11px;border-radius:999px;background:var(--orange);color:#04262c;font-weight:700;white-space:nowrap}
 .ib{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.2);color:#fff}
 .ib:hover{background:rgba(255,255,255,.1)}
 .ib svg{width:16px;height:16px}
@@ -329,8 +329,8 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 /* ---------- polish layer: one type scale (11/12/13/16/22/28), one radius scale (6/8/12), one bar style.
    Kept as a single appended block so it can be re-applied to a fresh export. Geometry read by the script
    (.trend 220px, .frbars 76px, .fb .m 14px) is deliberately untouched. ---------- */
-:root{--canvas:#f5f6fb;--line:#e3e5f0;--track:#eceef7;--hover:#f4f5fc;--muted:#63627f;
-  --shadow:0 1px 2px rgba(6,1,58,.04),0 1px 3px rgba(6,1,58,.05)}
+:root{--canvas:#f2f6f7;--line:#dfe9ea;--track:#e9f1f2;--hover:#f4f9f9;--muted:#527079;
+  --shadow:0 1px 2px rgba(4,38,44,.04),0 1px 3px rgba(4,38,44,.05)}
 .opts,.scr,.tw,.pv-w{scrollbar-width:thin;scrollbar-color:var(--line) transparent}
 /* fade the last partially-visible row so scrolling lists don't look sliced off */
 .opts,.scr,.tw{mask-image:linear-gradient(to bottom,#000 calc(100% - 16px),transparent)}
@@ -342,7 +342,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .ttl p{margin-top:2px;letter-spacing:0}
 .months{gap:2px;padding:3px;border-radius:10px;background:rgba(255,255,255,.07)}
 .months button{padding:6px 11px;border-radius:7px;font-size:12px;border:0}
-.months button[aria-pressed="true"]{background:#fff;color:#06013a}
+.months button[aria-pressed="true"]{background:#fff;color:#04262c}
 .hd-r{gap:8px}
 .upb,.pill,.ib{height:34px;border-radius:8px;border:1px solid rgba(255,255,255,.22)}
 .upb{padding:0 12px;background:transparent;color:#fff;font-weight:500;font-size:12px}
@@ -381,7 +381,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent)}
 .dd>summary:after{content:"";border:4px solid transparent;border-top-color:currentColor;margin-top:4px}
 .dd[open]>summary{border-color:var(--accent)}
 .dd.on>summary{background:var(--sel);color:var(--ink);font-weight:500}
-.dd .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;width:310px;max-height:340px;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(6,1,58,.18);padding:6px}
+.dd .pop{position:absolute;right:0;top:calc(100% + 6px);z-index:40;width:310px;max-height:340px;overflow-y:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(4,38,44,.18);padding:6px}
 .fctl .clear{padding:4px 8px}
 .fact{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:-4px 0 12px;font-size:12px;color:var(--muted)}
 .fact button{display:inline-flex;align-items:center;gap:6px;padding:3px 6px 3px 10px;border-radius:999px;background:var(--sel);color:var(--ink);font-size:12px}
@@ -437,7 +437,7 @@ tbody tr:last-child td{border-bottom:0}
 .reqs span{font:500 11px var(--font)}
 select{border-radius:6px}
 .res{border-radius:8px}
-#tip{padding:8px 10px;box-shadow:0 6px 20px rgba(6,1,58,.18)}
+#tip{padding:8px 10px;box-shadow:0 6px 20px rgba(4,38,44,.18)}
 
 @media (max-width:980px){
   .hd{padding:12px 16px}.tabs{padding:0 16px}.body{padding:12px 16px 28px}
