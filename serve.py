@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""TNOC dashboard: static server + tiny shared JSON store.
+"""TSAD dashboard: static server + tiny shared JSON store.
 
     python3 serve.py [port]          # default 8080
     open http://<this-mac-ip>:8080   # same latest data in every browser on the LAN
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     import sys
 
     port = int(sys.argv[1] if len(sys.argv) > 1 else os.environ.get("PORT", "8080"))
-    print(f"TNOC dashboard  ->  http://localhost:{port}")
+    print(f"TSAD dashboard  ->  http://localhost:{port}")
     print(f"store: {DATA}")
     print("write access:", "passcode required (" + ", ".join(sorted(passes())) + ")" if passes() else "OPEN - set DASH_PASS / SUB_PASS to restrict")
     ThreadingHTTPServer(("0.0.0.0", port), Handler).serve_forever()
