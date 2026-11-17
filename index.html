@@ -47,6 +47,7 @@ button{font:inherit;color:inherit;cursor:pointer;background:none;border:0;paddin
 .months button:disabled{opacity:.35;cursor:default}
 .hd-r{display:flex;align-items:center;gap:10px}
 .pill{font:500 12px var(--mono);letter-spacing:.06em;padding:6px 11px;border-radius:999px;background:var(--orange);color:#06013a;font-weight:700;white-space:nowrap}
+.fresh{font:500 11.5px var(--mono);color:var(--head-mute);white-space:nowrap}
 .ib{display:grid;place-items:center;width:34px;height:34px;border-radius:9px;border:1px solid rgba(255,255,255,.2);color:#fff}
 .ib:hover{background:rgba(255,255,255,.1)}
 .ib svg{width:16px;height:16px}
@@ -499,7 +500,7 @@ button.hh:hover{background:var(--hover)}.hh.on{color:var(--ink);font-weight:700;
 <header class="hd">
   <div class="ttl"><h1>TSAD Dashboard 2026</h1><p>Transmission submarine analytic dashboard</p></div>
   <nav class="months" id="months" aria-label="Month"></nav>
-  <div class="hd-r"><button class="upb" id="hup" type="button" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><span>Upload Excel</span></button><span class="pill" id="mlab"></span><button class="ib" id="theme" aria-label="Toggle dark mode"><svg><use href="#i-moon"/></svg></button></div>
+  <div class="hd-r"><button class="upb" id="hup" type="button" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5"/><path d="M4 16v3a1 1 0 001 1h14a1 1 0 001-1v-3"/></svg><span>Upload Excel</span></button><span class="pill" id="mlab"></span><span class="fresh" id="dts"></span><button class="ib" id="theme" aria-label="Toggle dark mode"><svg><use href="#i-moon"/></svg></button></div>
 </header>
 <div class="tabs" role="tablist">
   <button role="tab" aria-selected="true" data-v="dash">CTAC</button>
@@ -991,13 +992,14 @@ document.addEventListener('click',e=>{
 
 /* ---------- render ---------- */
 function render(){
-  renderMonths();renderSlicers();renderKPIs();renderGeo();renderInsights();
+  renderStamp();renderMonths();renderSlicers();renderKPIs();renderGeo();renderInsights();
   const np=barList('pic','#v-pic',{}),ns=barList('state','#v-state',{});
   $('#picN').textContent=np+' people';$('#stN').textContent=ns+' states';
   renderDonut();renderTables();renderTrend();renderFR();renderSub();
 }
 
 /* ---------- tooltip, tabs, theme ---------- */
+function renderStamp(){const el=$('#dts');if(!el)return;el.textContent=DATA_AT?'Data as of '+fmtAt(DATA_AT):'Baseline data · no upload yet';el.title=DATA_AT?'Latest published upload':'Baked baseline, never published over'}
 const tipEl=$('#tip');
 function showTip(e){const t=e.target.closest&&e.target.closest('[data-tip]');if(!t){tipEl.hidden=true;return}
   tipEl.innerHTML=t.getAttribute('data-tip');tipEl.hidden=false;
@@ -1016,6 +1018,7 @@ $('#theme').addEventListener('click',()=>{const r=document.documentElement,dark=
 /* ---------- data layer: original workbook + shared uploads ---------- */
 const HAS=Array(12).fill(false), LIVE={}, BASE_RAW=Array.from({length:12},()=>[]);
 let SEEDED=false;   /* store holds published months -> baked BASE must never fill the gaps */
+let DATA_AT=null;   /* newest publish timestamp across live docs, null while only the baked baseline exists */
 for(const r of BASE.rows)BASE_RAW[r[0]].push([BASE.pic[r[1]],BASE.state[r[2]],BASE.cause[r[3]],BASE.sub[r[4]],BASE.bld[r[5]],BASE.status[r[6]],r[8]]);
 const DK=['pic','state','cause','sub','bld','status'];
 const DEC=new WeakMap();
@@ -1051,10 +1054,11 @@ function buildData(){
   if(F.m!==null&&!HAS[F.m])F.m=null;
 }
 function applySnap(snap){
-  const seen=new Set();let frd=null,sbd=null;
-  snap.docs.forEach(s=>{if(s.id==='submarine'){const x=s.data();if(x&&Array.isArray(x.rows)&&x.rows.length&&Array.isArray(x.rows[0]))sbd=x;return}if(s.id==='faultrate'){const x=s.data();if(x&&Array.isArray(x.rows))frd=x;return}const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
+  const seen=new Set();let frd=null,sbd=null,at=null;
+  snap.docs.forEach(s=>{const x0=s.data();if(x0&&x0.at&&x0.source&&x0.source!=='baseline'&&(!at||x0.at>at))at=x0.at;
+    if(s.id==='submarine'){const x=s.data();if(x&&Array.isArray(x.rows)&&x.rows.length&&Array.isArray(x.rows[0]))sbd=x;return}if(s.id==='faultrate'){const x=s.data();if(x&&Array.isArray(x.rows))frd=x;return}const d=s.data();if(!d||!/^m(0[1-9]|1[0-2])$/.test(s.id)||!Array.isArray(d.rows)||!d.dic)return;const m=+s.id.slice(1)-1;seen.add(m);LIVE[m]=d});
   for(const k of Object.keys(LIVE))if(!seen.has(+k))delete LIVE[k];
-  FRLIVE=frd;SBLIVE=sbd;
+  FRLIVE=frd;SBLIVE=sbd;DATA_AT=at;
   SEEDED=seen.size>0;
   buildData();render();renderAdmin();
 }
