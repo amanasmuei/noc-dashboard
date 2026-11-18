@@ -1447,14 +1447,14 @@ function sbRow(){
   const L=SBLIVE;
   const tag=L?'<span class="bdg c-warn">Uploaded</span>':'<span class="bdg c-info">Original</span>';
   const det=L?`<b>${esc(L.source||'file')}</b> · ${esc(fmtAt(L.at))}<br>by ${esc(nameOf(L.by))}`:'From SubmarineNTT_v11.xlsx';
-  const act=L&&ADM.can&&okFor('submarine')?'<button class="btn ghost sm" data-rvsb="1" type="button">Revert</button>':'';
+  const act=L&&ADM.can&&okFor('submarine')?'<button class="btn ghost sm" data-rvsb="1" type="button">Remove</button>':'';
   return `<div class="mrow" style="grid-template-columns:minmax(0,1fr) auto;border-top:1.5px solid var(--line);margin-top:4px"><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Submarine</b>${tag}<span class="num" style="font-size:12.5px">${fmt(sbData().rows.length)} NTT</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
 }
 function frRow(){
   const L=FRLIVE;
   const tag=L?'<span class="bdg c-warn">Uploaded</span>':'<span class="bdg c-info">Original</span>';
   const det=L?`<b>${esc(L.source||'file')}</b> · ${esc(fmtAt(L.at))}<br>by ${esc(nameOf(L.by))}`:'From the original workbook';
-  const act=L&&ADM.can&&okFor('dashboard')?'<button class="btn ghost sm" data-rvfr="1" type="button">Revert</button>':'';
+  const act=L&&ADM.can&&okFor('dashboard')?'<button class="btn ghost sm" data-rvfr="1" type="button">Remove</button>':'';
   return `<div class="mrow" style="grid-template-columns:minmax(0,1fr) auto;border-top:1.5px solid var(--line);margin-top:4px"><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>Fault rate</b>${tag}</div><div class="d">${det}</div></div><div>${act}</div></div>`;
 }
 /* ---------- admin: parsing ---------- */
@@ -1585,14 +1585,14 @@ function renderAdmin(){
     if(live){tag='<span class="bdg c-warn">Uploaded</span>';det=`<b>${esc(live.source||'file')}</b> · ${esc(fmtAt(live.at))}<br>by ${esc(nameOf(live.by))}`}
     else if(n){tag='<span class="bdg c-info">Original</span>';det='From the original workbook'}
     else{tag='<span class="bdg c-mute">No data</span>';det='Not reported yet'}
-    const act=live&&ADM.can&&okFor('dashboard')?`<button class="btn ghost sm" data-rv="${i}" type="button">${BASE_RAW[i].length?'Revert':'Remove'}</button>`:'';
+    const act=live&&ADM.can&&okFor('dashboard')?`<button class="btn ghost sm" data-rv="${i}" type="button">Remove</button>`:'';
     return`<div class="mrow"><span class="m">${m}</span><div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${tag}<span class="num" style="font-size:12.5px">${n?fmt(n)+' NTT':''}</span></div><div class="d">${det}</div></div><div>${act}</div></div>`;
   }).join('')+frRow()+sbRow();
   // history
   const H=$('#a-hist');
   if(!ADM.can)$('#a-histc').hidden=true;else{
     $('#a-histc').hidden=false;
-    H.innerHTML=ADM.hist.length?ADM.hist.slice(0,8).map(h=>`<div><b>${h.kind==='revert'?'Reverted':'Published'} ${esc([...(h.months||[]).map(x=>MN[x]),...(h.fr?['fault rate']:[]),...(h.sb?['submarine']:[])].join(', '))}</b>${h.file?' · '+esc(h.file):''}<small>${esc(fmtAt(h.at))} · ${esc(nameOf(h.by))}</small></div>`).join(''):'<p class="empty">No uploads yet.</p>';
+    H.innerHTML=ADM.hist.length?ADM.hist.slice(0,8).map(h=>`<div><b>${h.kind==='revert'?'Removed':'Published'} ${esc([...(h.months||[]).map(x=>MN[x]),...(h.fr?['fault rate']:[]),...(h.sb?['submarine']:[])].join(', '))}</b>${h.file?' · '+esc(h.file):''}<small>${esc(fmtAt(h.at))} · ${esc(nameOf(h.by))}</small></div>`).join(''):'<p class="empty">No uploads yet.</p>';
   }
   // sheets
   const sh=$('#a-sheets');
@@ -1685,7 +1685,7 @@ $('#a-res').addEventListener('click',e=>{
 $('#a-months').addEventListener('click',async e=>{
   const b=e.target.closest('[data-rv]');if(!b||!ADM.can||!ADM.db)return;
   const i=+b.dataset.rv;
-  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent=BASE_RAW[i].length?'Revert':'Remove'}},4000);return}
+  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Remove'}},4000);return}
   b.disabled=true;
   try{await ADM.db.doc('ntt/m'+String(i+1).padStart(2,'0')).delete();delete LIVE[i];buildData();render();
     await log({kind:'revert',at:new Date().toISOString(),by:ADM.me||null,months:[i]});loadHist();
@@ -1694,7 +1694,7 @@ $('#a-months').addEventListener('click',async e=>{
 });
 $('#a-months').addEventListener('click',async e=>{
   const b=e.target.closest('[data-rvsb]');if(!b||!ADM.can||!ADM.db)return;
-  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Revert'}},4000);return}
+  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Remove'}},4000);return}
   b.disabled=true;
   try{await ADM.db.doc('ntt/submarine').delete();SBLIVE=null;render();
     await log({kind:'revert',at:new Date().toISOString(),by:ADM.me||null,months:[],sb:true});loadHist();
@@ -1703,7 +1703,7 @@ $('#a-months').addEventListener('click',async e=>{
 });
 $('#a-months').addEventListener('click',async e=>{
   const b=e.target.closest('[data-rvfr]');if(!b||!ADM.can||!ADM.db)return;
-  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Revert'}},4000);return}
+  if(!b.dataset.sure){b.dataset.sure=1;b.textContent='Sure?';setTimeout(()=>{if(b.isConnected){delete b.dataset.sure;b.textContent='Remove'}},4000);return}
   b.disabled=true;
   try{await ADM.db.doc('ntt/faultrate').delete();FRLIVE=null;render();
     await log({kind:'revert',at:new Date().toISOString(),by:ADM.me||null,months:[],fr:true});loadHist();
